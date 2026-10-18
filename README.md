@@ -35,7 +35,11 @@ Never commit a service-account JSON key. The Web SDK config is intended to be in
 - Program, branch/specialization, subject, module, topic, and pasted notes.
 - Fixed seven-slide sequence: title, core idea, steps, formula/key terms, worked example, shortcut/memory cue, and recap.
 - Optional source labels: `CONCEPT:`, `STEPS:`, `FORMULA:`, `WORKED EXAMPLE:`, `TRICK:`.
-- Edit slide text, animate/navigate through slides, and use browser speech synthesis to read a slide aloud.
+- Play slides in sequence with browser speech synthesis; each slide advances after its narration finishes, plus a configurable 0/2/4/6-second pause (2 seconds by default). If speech is unavailable, timing is estimated from the narration length.
+- Pause, resume, stop, and manually navigate while keeping speech coordinated; closing the builder and signing out cancel playback.
+- Read only the current slide aloud with browser speech synthesis.
+- Choose Campus, Notebook, or Midnight visual themes and select Gentle rise, Fade, Slide in, or None for slide transitions; motion is reduced when the device requests it.
+- Choose Auto, Female, or Male narration from English voices available on the device. Voice names and gender metadata vary by browser; if a match cannot be identified, the browser default is used.
 - Firebase Authentication email/password sign-in and per-user Firestore lesson storage.
 - The note organizer does not call an AI, verify academic facts, create voice files, or export MP4. Review formulas/examples before using the slides.
 
