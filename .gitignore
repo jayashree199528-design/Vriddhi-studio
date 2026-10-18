@@ -1,0 +1,23 @@
+# Local lesson content and generated database files
+data/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+
+# Firebase/GCP credentials: never commit these
+.env
+.env.*
+!.env.example
+*service-account*.json
+*firebase-adminsdk*.json
+serviceAccountKey.json
+firebase-debug.log
+.firebase/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Frontend build artifacts
+node_modules/
+dist/
