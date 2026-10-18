@@ -1,41 +1,1466 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lesson Studio — Academic Explainer Builder</title><link rel="icon" href="data:,"><style>
-:root{--bg:#f5f6f2;--paper:#fff;--ink:#192b36;--muted:#77868d;--line:#e4e9e6;--teal:#136c67;--teal2:#e5f3f0;--mint:#bde9d3;--yellow:#f0d37b;--blue:#dceafa;--shadow:0 14px 38px #1e342510}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}.shell{display:flex;min-height:100vh}.side{width:232px;flex:0 0 232px;background:#fff;border-right:1px solid var(--line);padding:23px 15px;display:flex;flex-direction:column}.logo{padding:0 9px 27px;display:flex;gap:10px;align-items:center}.logo-mark{width:32px;height:32px;border-radius:10px;background:var(--teal);color:white;display:grid;place-items:center}.logo-mark svg{width:18px}.logo strong{font-size:16px;letter-spacing:-.4px}.logo small{display:block;color:#8d999c;font-size:9px;letter-spacing:.5px;margin-top:-2px}.nav-label{color:#a0aaab;text-transform:uppercase;letter-spacing:1.1px;font-weight:750;font-size:9px;padding:0 10px;margin:8px 0}.nav{display:grid;gap:3px}.nav button{border:0;background:transparent;border-radius:8px;color:#66777d;padding:10px;display:flex;align-items:center;gap:11px;text-align:left;font-size:12px;font-weight:600}.nav button.active{background:#eaf4f1;color:#145e59}.nav button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}.nav button span{margin-left:auto;background:#fff;border:1px solid #e7ece8;padding:1px 6px;border-radius:20px;font-size:9px;color:#77868d}.side-bottom{margin-top:auto}.plan{background:#f5f8f5;border:1px solid var(--line);border-radius:10px;padding:12px;margin:0 2px 12px}.plan-head{display:flex;justify-content:space-between;font-size:10px;font-weight:700}.plan p{font-size:9px;color:#889592;margin:7px 0 0}.profile{border-top:1px solid var(--line);padding:13px 5px 0;display:flex;align-items:center;gap:9px}.avatar{width:29px;height:29px;border-radius:50%;background:#e9e1cf;color:#675739;display:grid;place-items:center;font-size:10px;font-weight:800}.profile strong{display:block;font-size:10px}.profile small{display:block;color:#879397;font-size:9px}.layout{min-width:0;flex:1}.top{height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 34px}.crumb{color:#899599;font-size:11px}.crumb b{color:#34484e}.top-right{display:flex;gap:12px;align-items:center}.top-right button{border:0;background:transparent;color:#738188;font-size:11px}.main{max-width:1120px;margin:auto;padding:34px 34px 60px}.hello{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px}.kicker{color:#77928c;text-transform:uppercase;letter-spacing:1.4px;font-size:9px;font-weight:800}.hello h1{font-size:27px;letter-spacing:-1px;margin:5px 0 4px;font-weight:690}.hello p{color:#839095;font-size:11px;margin:0}.primary{border:0;background:var(--teal);color:#fff;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:8px;box-shadow:0 3px 9px #136c6720}.primary:hover{background:#0e5b57}.primary svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}.hero{background:#e6f1ed;border:1px solid #dce9e2;border-radius:14px;padding:21px 25px;min-height:124px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;margin-bottom:20px}.hero h2{font:500 21px/1.2 Georgia,serif;margin:6px 0}.hero p{color:#637b75;font-size:11px;margin:0;max-width:500px}.hero-art{width:155px;height:93px;opacity:.85;z-index:1}.hero-art svg{width:100%;height:100%}.hero::after{content:"";position:absolute;right:75px;top:-135px;width:220px;height:220px;border:1px solid #c9ddd3;border-radius:50%;box-shadow:0 0 0 22px #d3e2da80,0 0 0 45px #d3e2da55}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:25px}.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 15px}.stat-label{color:#879498;font-size:9px;font-weight:750;letter-spacing:.5px}.stat b{display:block;margin-top:4px;font-size:20px;letter-spacing:-.5px}.stat small{color:#8c9899;font-size:9px;font-weight:500;margin-left:4px}.section-title{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}.section-title h2{font-size:14px;margin:0}.section-title button{border:1px solid var(--line);background:#fff;color:#78868a;border-radius:6px;padding:6px 9px;font-size:10px}.modules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.module{background:white;border:1px solid var(--line);border-radius:11px;overflow:hidden;cursor:pointer;transition:.15s}.module:hover{transform:translateY(-2px);box-shadow:var(--shadow)}.thumb{height:119px;background:#edf4f1;display:grid;place-items:center;position:relative;overflow:hidden}.thumb.c2{background:#edf1fa}.thumb.c3{background:#f5f0e5}.thumb.c4{background:#eff2e9}.thumb.c5{background:#f2eaf0}.thumb.c6{background:#e8f1f3}.thumb svg{width:90%;height:100px}.type{position:absolute;top:9px;left:10px;background:#ffffffd9;padding:4px 7px;border-radius:4px;font-size:8px;font-weight:800;color:#53736c}.module-body{padding:11px 12px}.module-body h3{margin:0 0 5px;font-size:11px}.meta{display:flex;justify-content:space-between;color:#879397;font-size:9px}.module-footer{display:flex;justify-content:space-between;border-top:1px solid #eff2ee;margin-top:9px;padding-top:8px;color:#8c9798;font-size:9px}.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#7da98b;margin-right:5px}.empty{grid-column:1/-1;text-align:center;color:#8b9898;border:1px dashed #d3ded7;border-radius:11px;background:#fff;padding:34px}.empty strong{display:block;color:#465b5d;font-size:12px}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,15px);opacity:0;background:#203b3d;color:#fff;padding:10px 15px;border-radius:8px;font-size:11px;z-index:60;transition:.2s;pointer-events:none}.toast.show{transform:translate(-50%,0);opacity:1}
-.auth-gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 80% 15%,#e2f1e9 0,transparent 35%),#f5f6f2}.auth-card{width:min(410px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;padding:27px;box-shadow:0 18px 50px #19362a16}.auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}.auth-brand strong{font-size:17px}.auth-card h1{font-size:23px;letter-spacing:-.7px;margin:0 0 5px}.auth-sub{color:#7d8a8d;font-size:11px;margin:0 0 19px}.auth-field{margin:0 0 13px}.auth-field label{display:block;font-size:10px;font-weight:750;color:#506165;margin-bottom:5px}.auth-field input{width:100%;padding:11px 12px;border:1px solid #dfe6e1;border-radius:8px;outline:none;font-size:12px}.auth-field input:focus{border-color:#74a798;box-shadow:0 0 0 3px #e8f3ee}.auth-submit{width:100%;justify-content:center;margin-top:5px;padding:12px}.auth-error{min-height:16px;margin:9px 0 2px;color:#b64c43;font-size:10px}.auth-note{font-size:9px;color:#8c9999;line-height:1.6;margin:14px 0 0}.signed-email{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#718084;font-size:10px}.signout{border:1px solid var(--line)!important;background:#fff!important;border-radius:7px!important;padding:7px 10px!important;color:#526568!important;font-weight:650!important}
-/* builder */.overlay{position:fixed;inset:0;display:none;z-index:10;background:#f5f6f2;overflow:auto}.overlay.open{display:block}.builder-top{height:59px;position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;z-index:3}.builder-left{display:flex;align-items:center;gap:10px}.back{border:1px solid var(--line);background:#fff;border-radius:7px;width:29px;height:29px;color:#5f7275}.builder-left strong{font-size:11px}.saved{color:#92a09e;font-size:9px;margin-left:8px}.builder-body{max-width:1130px;margin:24px auto 60px;padding:0 22px}.builder-heading{margin-bottom:17px}.builder-heading h1{font-size:23px;letter-spacing:-.7px;margin:4px 0}.builder-heading p{font-size:10px;color:#869294;margin:0}.steps{display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px 15px;margin-bottom:15px}.step{display:flex;align-items:center;gap:7px;color:#91a09f;font-size:9px;font-weight:700;flex:1}.step.active{color:#266d61}.step i{width:19px;height:19px;border:1px solid #dce4e0;border-radius:50%;font-style:normal;display:grid;place-items:center;font-size:8px}.step.active i{background:#e7f4ef;border-color:#bfd9cd;color:#286d60}.step:after{content:"";height:1px;background:#e9ede9;flex:1;margin:0 10px}.step:last-child:after{display:none}.builder-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(345px,.92fr);gap:15px;align-items:start}.card{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}.card-title{padding:13px 15px;border-bottom:1px solid #eef1ed;display:flex;justify-content:space-between;align-items:center}.card-title h2{font-size:11px;margin:0}.card-title p{color:#8c9899;font-size:9px;margin:3px 0 0}.card-content{padding:14px}.field{margin-bottom:12px}.field:last-child{margin-bottom:0}.field label{display:block;font-size:9px;font-weight:800;color:#56686b;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;background:#fff;border:1px solid #dde5e0;border-radius:7px;padding:9px 10px;color:#263c40;font-size:10px;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#76a89a;box-shadow:0 0 0 3px #e8f3ee}.field textarea{height:186px;resize:vertical;line-height:1.55}.field textarea::placeholder{color:#a0aaaa}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.helper{font-size:8px;color:#95a09e;margin-top:5px}.template-lock{display:flex;align-items:center;gap:7px;padding:9px 10px;background:#eef5f0;border-radius:7px;font-size:9px;color:#4d7569;margin:10px 0}.template-lock svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7}.format-chip{background:#f3f6f3;border:1px solid #e5ebe6;border-radius:6px;color:#667875;padding:6px 8px;font-size:9px}.build-actions{padding-top:11px;border-top:1px solid #eef1ed;display:flex;justify-content:space-between;align-items:center;margin-top:13px}.build-actions span{font-size:9px;color:#96a19e}.deck-panel{position:sticky;top:75px}.deck-top{padding:12px 14px;border-bottom:1px solid #eef1ed;display:flex;align-items:center;justify-content:space-between}.deck-top strong{font-size:10px}.deck-top small{font-size:9px;color:#859392}.slide-stage{margin:14px;background:#edf3ee;border-radius:8px;aspect-ratio:16/9;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;transition:background .3s}.slide-stage::before{content:"";position:absolute;width:230px;height:230px;border:1px solid #ffffff28;border-radius:50%;right:-55px;top:-135px;box-shadow:0 0 0 20px #ffffff10,0 0 0 42px #ffffff08}.slide-stage.empty-stage{background:#eaf0ec;color:#647a71}.stage-content{position:relative;z-index:1;width:100%;height:100%;padding:9% 10%;display:flex;flex-direction:column;justify-content:center;animation:slideIn .45s ease-out}.stage-content .slide-kicker{font-size:clamp(7px,1vw,10px);letter-spacing:1.7px;text-transform:uppercase;font-weight:800;opacity:.78}.stage-content h2{font:600 clamp(18px,2.6vw,30px)/1.16 Georgia,serif;max-width:84%;margin:10px 0 9px;letter-spacing:-.3px}.stage-content p{font-size:clamp(9px,1.25vw,13px);line-height:1.6;max-width:80%;margin:0;opacity:.92}.stage-content .formula{display:inline-block;margin-top:11px;padding:8px 12px;border-radius:6px;background:#ffffff20;border:1px solid #ffffff50;font:600 clamp(12px,1.8vw,19px)/1.3 ui-monospace,monospace;max-width:max-content}.stage-content .steps-list{margin:8px 0 0;padding-left:17px;font-size:clamp(9px,1.15vw,12px);line-height:1.7}.stage-content .number{position:absolute;right:10%;bottom:10%;font:italic 42px Georgia,serif;opacity:.17}.stage-content .diagram{position:absolute;right:10%;top:28%;width:85px;height:85px;border:1px solid #ffffff75;border-radius:50%;display:grid;place-items:center;font-size:22px;opacity:.86}.stage-content .diagram:before,.stage-content .diagram:after{content:"";position:absolute;width:120px;height:1px;background:#ffffff70;transform:rotate(45deg)}.stage-content .diagram:after{transform:rotate(-45deg)}@keyframes slideIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}.player-controls{display:flex;align-items:center;gap:7px;padding:0 14px 12px}.player-controls button{border:1px solid #e2e9e4;background:#fff;color:#516569;border-radius:6px;height:27px;padding:0 9px;font-size:9px}.player-controls .play{background:#176d65;color:#fff;border-color:#176d65}.player-controls .slide-index{font-size:9px;color:#849290;margin-left:auto}.slide-strip{display:flex;gap:7px;padding:0 14px 13px;overflow-x:auto}.slide-mini{flex:0 0 71px;height:43px;border:1px solid #e2e9e4;border-radius:5px;background:#e9f1eb;color:#546d66;font-size:8px;display:grid;place-items:center;padding:5px;text-align:center;cursor:pointer}.slide-mini.current{outline:2px solid #348276;border-color:transparent}.slide-mini:nth-child(3n){background:#e7edf7}.slide-mini:nth-child(3n+1){background:#f3eee1}.alert{padding:9px 11px;border:1px solid #e5ede6;background:#f6f9f6;color:#75867e;font-size:9px;line-height:1.5;border-radius:7px;margin:12px 14px 14px}.script-list{display:none}.script-list.open{display:block}.script-slide{padding:11px 13px;border-bottom:1px solid #eef1ed}.script-slide:last-child{border:0}.script-slide span{display:block;font-size:8px;font-weight:800;letter-spacing:.7px;color:#6b9183;margin-bottom:4px}.script-slide input,.script-slide textarea{width:100%;border:0;outline:0;background:transparent;color:#273e42;padding:3px 0;font-size:10px}.script-slide input{font-weight:750}.script-slide textarea{resize:vertical;min-height:43px;color:#657579;line-height:1.5}.empty-script{padding:28px 16px;text-align:center;color:#91a09d;font-size:10px}.render-note{font-size:8px;color:#97a2a0;line-height:1.5;margin-top:8px}.toast{z-index:50}
-@media(max-width:930px){.side{width:190px;flex-basis:190px}.main{padding:28px 22px}.builder-grid{grid-template-columns:1fr}.deck-panel{position:static}.slide-stage{max-height:410px}.stage-content h2{font-size:clamp(22px,4vw,32px)}.stage-content p{font-size:clamp(12px,2vw,15px)}}@media(max-width:680px){.side{display:none}.top{height:53px;padding:0 15px}.main{padding:23px 14px 45px}.hello{align-items:flex-start;flex-direction:column;gap:14px}.hello .primary{width:100%;justify-content:center}.hello h1{font-size:23px}.hero{padding:17px;min-height:115px}.hero h2{font-size:18px;max-width:250px}.hero p{max-width:240px}.hero-art{width:100px;opacity:.5}.hero::after{right:-60px}.stats{gap:7px}.stat{padding:11px 9px}.stat b{font-size:16px}.stat-label{font-size:8px}.modules{grid-template-columns:1fr}.thumb{height:135px}.builder-top{padding:0 11px}.builder-body{padding:0 11px;margin:18px auto}.builder-heading h1{font-size:20px}.steps{padding:10px 8px}.step{font-size:0;justify-content:center;gap:4px}.step i{font-size:8px}.step:after{margin:0 6px}.field-row{grid-template-columns:1fr}.field textarea{height:160px}.slide-stage{margin:9px}.deck-panel{top:0}.saved{display:none}}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>Vriddhi Lesson Studio — Academic Explainer Builder</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f5ef;
+      --paper-deep: #f0eee6;
+      --surface: #fffefa;
+      --surface-muted: #f4f2eb;
+      --ink: #26372f;
+      --ink-soft: #43574b;
+      --muted: #6f7a72;
+      --muted-soft: #899188;
+      --line: #e6e2d9;
+      --forest: #315b49;
+      --forest-dark: #254736;
+      --forest-deep: #203d31;
+      --forest-soft: #e8efe8;
+      --terracotta: #b76549;
+      --gold: #cfac68;
+      --blue-soft: #e9edf0;
+      --shadow-sm: 0 5px 18px rgba(40, 53, 44, .055);
+      --shadow-md: 0 18px 48px rgba(40, 53, 44, .09);
+      --focus: 0 0 0 3px rgba(83, 133, 104, .2);
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-.player-controls{flex-wrap:wrap}
-.playback-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;padding:0 14px 12px;color:#7b8985}
-.playback-settings label{display:grid;gap:4px;font-size:8px;font-weight:750;color:#778782}
-.playback-settings select{width:100%;height:29px;border:1px solid #e2e9e4;background:#fff;color:#516569;border-radius:6px;padding:0 7px;font-size:9px}
-.playback-settings small{grid-column:1/-1;font-size:8px;line-height:1.35;color:#84918d}
-.playback-settings .voice-status{color:#607e71}
-.stage-content{animation:none}
-.stage-content.transition-rise{animation:slideIn .42s ease-out both}
-.stage-content.transition-fade{animation:slideFade .38s ease-out both}
-.stage-content.transition-slide{animation:slideFromRight .42s cubic-bezier(.2,.7,.2,1) both}
-.stage-content.transition-none{animation:none}
-@keyframes slideFade{from{opacity:0}to{opacity:1}}
-@keyframes slideFromRight{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-.slide-stage[data-template="notebook"]{border:1px solid #d9d1bc;box-shadow:inset 0 0 0 5px #ffffff66}
-.slide-stage[data-template="notebook"]::before{border-color:#71857740;box-shadow:0 0 0 20px #71857712,0 0 0 42px #71857708}
-.slide-stage[data-template="notebook"] .stage-content .slide-kicker{color:#537063}
-.slide-stage[data-template="notebook"] .stage-content .diagram{border-color:#64857788}
-.slide-stage[data-template="notebook"] .stage-content .diagram::before,.slide-stage[data-template="notebook"] .stage-content .diagram::after{background:#64857755}
-.slide-stage[data-template="notebook"] .stage-content .formula{background:#ffffff99;border-color:#55715d55}
-.slide-stage[data-template="midnight"]::before{border-color:#80dbd855;box-shadow:0 0 0 20px #80dbd812,0 0 0 42px #80dbd808}
-.slide-stage[data-template="midnight"] .stage-content .diagram{border-color:#80dbd899}
-.slide-stage[data-template="midnight"] .stage-content .diagram::before,.slide-stage[data-template="midnight"] .stage-content .diagram::after{background:#80dbd866}
-.slide-stage[data-template="midnight"] .stage-content .formula{border-color:#a9e4d655;background:#ffffff18}
-@media(prefers-reduced-motion:reduce){.stage-content.transition-rise,.stage-content.transition-fade,.stage-content.transition-slide{animation:none!important}.slide-stage{transition:none!important}}
-@media(max-width:430px){.playback-settings{gap:7px}.playback-settings label{font-size:7px}.playback-settings select{font-size:8px}}
-</style></head><body>
-<div class="auth-gate" id="authGate"><div class="auth-card"><div class="auth-brand"><div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19 12 4l8 15H4Z"/><path d="M8.5 15h7M12 11l4 8"/></svg></div><strong>Lesson Studio</strong></div><h1>Sign in to your workspace</h1><p class="auth-sub">Private academic lesson builder · account access only</p><form onsubmit="signIn(event)"><div class="auth-field"><label for="loginEmail">EMAIL</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div><div class="auth-field"><label for="loginPassword">PASSWORD</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Your password"></div><div class="auth-error" id="authError" role="alert"></div><button class="primary auth-submit" id="loginButton" type="submit">Sign in</button></form><p class="auth-note">Accounts are provisioned by the project administrator. There is no public sign-up form.</p></div></div>
-<div class="shell" id="home" style="display:none"><aside class="side"><div class="logo"><div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19 12 4l8 15H4Z"/><path d="M8.5 15h7M12 11l4 8"/></svg></div><div><strong>Lesson Studio</strong><small>ACADEMIC EXPLAINER BUILDER</small></div></div><div class="nav-label">Studio</div><nav class="nav"><button class="active" data-nav="Dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="11" width="7" height="10" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/></svg>Dashboard</button><button data-nav="My lessons"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 17a2.5 2.5 0 0 1 2.5-2.5H20M8 7h8M8 10h7"/></svg>My lessons <span id="lessonCount">0</span></button><button data-nav="Template"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>Slide templates</button></nav><div class="nav-label" style="margin-top:22px">Your workflow</div><nav class="nav"><button onclick="showToast('Paste your prepared notes; Lesson Studio organizes them into a consistent lesson deck.')"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>Paste notes</button><button onclick="showToast('Formula, example, shortcut and recap follow the same lesson flow across subjects.')"><svg viewBox="0 0 24 24"><path d="M7 4h10M9 4 5 20m10-16 4 16M7 13h10"/></svg>Explain concepts</button></nav><div class="side-bottom"><div class="plan"><div class="plan-head"><span>Internal workspace</span><span>●</span></div><p>For your own academic content. Not published to students.</p></div><div class="profile"><div class="avatar">ME</div><div><strong>Course creator</strong><small>Private workspace</small></div></div></div></aside><main class="layout"><header class="top"><div class="crumb">Lesson Studio <span style="margin:0 7px;color:#bdc5c1">/</span> <b>Dashboard</b></div><div class="top-right"><span class="signed-email" id="signedInEmail">Signed in</span><div class="avatar" id="userAvatar">ME</div><button class="signout" onclick="signOut()">Sign out</button></div></header><div class="main"><div class="hello"><div><div class="kicker">YOUR ACADEMIC CONTENT WORKSPACE</div><h1>Turn your notes into a clear lesson.</h1><p>Paste the explanations, formulas and shortcuts you already prepared. Review a consistent animated slide deck.</p></div><button class="primary" onclick="openBuilder()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Build a lesson</button></div><section class="hero"><div><div class="kicker" style="color:#4f8274">THREE THEMES · MANY SUBJECTS</div><h2>Consistent explanations, from B.Com to B.Tech.</h2><p>Use the same clean slide language for accounting, science, humanities, engineering and their specializations.</p></div><div class="hero-art"><svg viewBox="0 0 160 100" fill="none"><rect x="17" y="18" width="88" height="58" rx="6" fill="#f8fbf8" stroke="#9bb9a9"/><path d="M27 31h42M27 39h57M27 47h35" stroke="#9bb9a9" stroke-width="2" stroke-linecap="round"/><path d="M76 63c8-12 12-21 20-29" stroke="#4d8c79" stroke-width="2" stroke-linecap="round"/><circle cx="94" cy="33" r="9" fill="#d3ecdc" stroke="#4d8c79"/><path d="m91 33 2 2 4-5" stroke="#4d8c79" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M117 31h23M117 41h17M117 51h21" stroke="#7fa894" stroke-width="2" stroke-linecap="round"/><circle cx="125" cy="70" r="13" fill="#f8fbf8" stroke="#dbbd6c"/><path d="M125 63v7l5 3" stroke="#ba9c4a" stroke-width="1.5" stroke-linecap="round"/><path d="m112 69 3 2 4-5" stroke="#4d8c79" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></section><div class="stats"><div class="stat"><span class="stat-label">LESSONS IN YOUR FIREBASE ACCOUNT</span><b id="statLessons">0<small>created</small></b></div><div class="stat"><span class="stat-label">VISUAL THEMES</span><b>03<small>selectable styles</small></b></div><div class="stat"><span class="stat-label">EXPORT STATUS</span><b style="font-size:14px;margin-top:10px">Prototype preview<small>video export is next</small></b></div></div><div class="section-title"><h2>Recent lessons</h2><button onclick="showToast('Lessons are stored only in this browser prototype.')">Saved in Firebase⌄</button></div><div class="modules" id="modules"></div></div></main></div>
-<div class="overlay" id="builder"><div class="builder-top"><div class="builder-left"><button class="back" onclick="closeBuilder()">←</button><div><strong id="builderTitle">New academic lesson</strong><span class="saved">Private draft · saved in local database</span></div></div><div><button class="format-chip" onclick="showToast('Choose Campus, Notebook, or Midnight; the lesson sequence stays consistent.')">3 slide themes</button></div></div><div class="builder-body"><div class="builder-heading"><div class="kicker">LESSON BUILDER</div><h1>Set the context. Paste your prepared content.</h1><p>Keep your notes as the source of truth. This prototype arranges them into a repeatable teaching sequence.</p></div><div class="steps"><div class="step active"><i>1</i> Lesson details</div><div class="step"><i>2</i> Scene structure</div><div class="step"><i>3</i> Preview</div></div><div class="builder-grid"><section class="card"><div class="card-title"><div><h2>Lesson inputs</h2><p>Designed for degree and engineering college topics.</p></div><span class="format-chip">Text-first</span></div><div class="card-content"><div class="field-row"><div class="field"><label for="program">PROGRAM</label><select id="program"><option>B.Com</option><option>B.Sc</option><option>BBA</option><option>BA</option><option>B.E. / B.Tech</option><option>Other degree program</option></select></div><div class="field"><label for="branch">BRANCH / SPECIALIZATION</label><input id="branch" placeholder="e.g. CSE, ECE, Finance, Physics"></div></div><div class="field-row"><div class="field"><label for="subject">SUBJECT</label><input id="subject" placeholder="e.g. Data Structures, Cost Accounting"></div><div class="field"><label for="module">MODULE / UNIT</label><input id="module" placeholder="e.g. Module 2 · Trees and graphs"></div></div><div class="field"><label for="topic">TOPIC</label><input id="topic" placeholder="e.g. Binary search trees" required></div><div class="field"><label for="notes">PASTE YOUR TOPIC BRIEF, EXPLANATION, FORMULAS, EXAMPLES, TRICKS & SHORTCUTS</label><textarea id="notes" placeholder="Paste the content you prepared with your AI tools. Keep formulas and worked examples as text. Headings help, for example:\n\nCONCEPT / EXPLANATION:\n…\n\nFORMULA / KEY TERMS:\n…\n\nWORKED EXAMPLE:\n…\n\nTRICK / SHORTCUT:\n…\n\nYou can paste normal notes too; labeled sections are optional."></textarea><div class="helper">Tip: label formulas and worked examples explicitly so the matching slides preserve them clearly.</div></div><div class="template-lock"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>The seven-slide lesson flow stays consistent; choose a visual theme and slide transition in the preview.</div><div class="build-actions"><span id="buildHint">No AI provider is connected yet.</span><button class="primary" onclick="generateDeck()">Arrange into lesson slides <span>→</span></button></div></div></section><section class="card deck-panel"><div class="deck-top"><div><strong id="deckTitle">Lesson preview</strong><br><small id="deckSub">Your generated slide sequence appears here.</small></div><button class="format-chip" onclick="toggleScript()" id="scriptToggle">Edit script</button></div><div class="slide-stage empty-stage" id="stage"><div class="stage-content" id="stageContent"><div class="slide-kicker">YOUR LESSON PREVIEW</div><h2>One clear idea at a time.</h2><p>Fill in the topic and notes, then arrange the content into a standard lesson sequence.</p><div class="number">01</div></div></div><div class="player-controls"><button onclick="prevSlide()" title="Previous slide">← Prev</button><button class="play" id="playBtn" onclick="togglePlay()" aria-label="Play slideshow">▶ Play slides</button><button onclick="stopPlay()" title="Stop slideshow">■ Stop</button><button onclick="nextSlide()" title="Next slide">Next →</button><button onclick="speakSlide()" title="Read current slide aloud">🔊 Voice</button><span class="slide-index" id="slideIndex">No slides yet</span></div><div class="playback-settings" aria-label="Playback preferences"><label for="templateSelect">Slide template <select id="templateSelect" onchange="setTemplate(this.value)"><option value="campus">Campus</option><option value="notebook">Notebook</option><option value="midnight">Midnight</option></select></label><label for="voicePreference">Narration voice <select id="voicePreference" onchange="setVoicePreference(this.value)"><option value="auto">Auto</option><option value="female">Female</option><option value="male">Male</option></select></label><label for="transitionStyle">Slide transition <select id="transitionStyle" onchange="setTransitionStyle(this.value)"><option value="rise">Gentle rise</option><option value="fade">Fade</option><option value="slide">Slide in</option><option value="none">None</option></select></label><label for="transitionPause">Pause after narration <select id="transitionPause" onchange="setTransitionPause(this.value)"><option value="0">No pause</option><option value="2000" selected>2 seconds</option><option value="4000">4 seconds</option><option value="6000">6 seconds</option></select></label><small class="voice-status" id="voiceStatus" aria-live="polite">Loading available voices…</small><small class="playback-hint" id="playbackHint" aria-live="polite">Each slide stays up for its narration plus 2 sec.</small><small class="motion-note">Transitions respect your device’s reduced-motion setting.</small></div><div class="slide-strip" id="slideStrip"><div class="slide-mini">Intro</div><div class="slide-mini">Concept</div><div class="slide-mini">Formula</div><div class="slide-mini">Example</div><div class="slide-mini">Shortcut</div><div class="slide-mini">Recap</div></div><div class="script-list" id="scriptList"><div class="empty-script">Generate your lesson first. Then edit slide headings and narration text here.</div></div><div class="alert"><b>Prototype status:</b> This organizes your prepared notes into slides and saves them to your Firebase account. It does not call an AI, create a voice file, or export MP4 yet.</div></section></div><p class="render-note">Lessons are stored in your signed-in Firebase account. Keep student-identifiable information out unless your institution has approved its use.</p></div></div><div class="toast" id="toast"></div>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js" defer></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js" defer></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js" defer></script>
-<script src="/firebase-config.js" defer></script>
-<script src="/app.js" defer></script></body></html>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 14px/1.55 var(--sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 0;
+      box-shadow: var(--focus);
+    }
+    button:disabled { cursor: wait; opacity: .7; }
+    svg { display: block; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* App shell and navigation */
+    .shell { display: flex; min-height: 100vh; }
+    .side {
+      position: sticky;
+      top: 0;
+      display: flex;
+      flex: 0 0 254px;
+      flex-direction: column;
+      width: 254px;
+      height: 100vh;
+      padding: 25px 17px 18px;
+      overflow-y: auto;
+      background: var(--paper-deep);
+      border-right: 1px solid var(--line);
+    }
+    .logo { display: flex; align-items: center; gap: 11px; padding: 0 7px 29px; }
+    .logo-mark {
+      display: grid;
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      color: #fffdf5;
+      background: var(--forest);
+      border-radius: 14px 14px 14px 5px;
+      box-shadow: 0 5px 13px rgba(36, 71, 54, .15);
+    }
+    .logo-mark svg { width: 23px; height: 23px; }
+    .logo strong { display: block; font-size: 15px; font-weight: 750; letter-spacing: -.45px; line-height: 1.2; }
+    .logo small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted-soft);
+      font-size: 8px;
+      font-weight: 750;
+      letter-spacing: 1.05px;
+    }
+    .nav-label {
+      margin: 0 0 8px;
+      padding: 0 11px;
+      color: #92958b;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      display: flex;
+      min-height: 46px;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 11px;
+      color: #66736b;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 650;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+    }
+    .nav button:hover { color: var(--forest-dark); background: rgba(255, 254, 250, .65); }
+    .nav button.active {
+      color: var(--forest-dark);
+      background: #e4ebe2;
+      border-color: #dce5da;
+    }
+    .nav button svg {
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.65;
+    }
+    .nav button span {
+      display: grid;
+      min-width: 24px;
+      min-height: 22px;
+      margin-left: auto;
+      padding: 0 6px;
+      place-items: center;
+      color: #788279;
+      font-size: 10px;
+      font-weight: 750;
+      background: rgba(255, 254, 250, .86);
+      border: 1px solid #e6e5dc;
+      border-radius: 20px;
+    }
+    .nav-workflow { margin-top: 25px; }
+    .side-bottom { margin-top: auto; padding-top: 23px; }
+    .plan {
+      margin: 0 2px 16px;
+      padding: 14px 13px;
+      background: rgba(255, 254, 250, .7);
+      border: 1px solid #e3e0d6;
+      border-radius: 13px;
+    }
+    .plan-head { display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 750; }
+    .plan-head .plan-dot { width: 7px; height: 7px; background: #6f9476; border-radius: 50%; box-shadow: 0 0 0 3px #e6eee4; }
+    .plan p { margin: 7px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .profile { display: flex; align-items: center; gap: 10px; padding: 15px 5px 0; border-top: 1px solid #e2dfd5; }
+    .avatar {
+      display: grid;
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      color: #70523d;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .3px;
+      background: #e8d8c5;
+      border: 2px solid #f8f4e9;
+      border-radius: 50%;
+    }
+    .profile strong { display: block; font-size: 11px; font-weight: 700; }
+    .profile small { display: block; margin-top: 2px; color: var(--muted-soft); font-size: 9px; }
+    .layout { flex: 1; min-width: 0; }
+    .top {
+      position: sticky;
+      z-index: 6;
+      top: 0;
+      display: flex;
+      height: 70px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(22px, 3.2vw, 48px);
+      background: rgba(247, 245, 239, .94);
+      border-bottom: 1px solid rgba(230, 226, 217, .9);
+      backdrop-filter: blur(12px);
+    }
+    .crumb { color: var(--muted-soft); font-size: 11px; }
+    .crumb b { color: var(--ink-soft); font-weight: 700; }
+    .crumb-separator { margin: 0 9px; color: #c2beb3; }
+    .top-right { display: flex; align-items: center; gap: 12px; }
+    .signed-email {
+      max-width: 230px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .top-right .avatar { width: 34px; height: 34px; flex-basis: 34px; }
+    .signout {
+      min-height: 40px;
+      padding: 7px 12px;
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      transition: border-color .18s ease, background-color .18s ease;
+    }
+    .signout:hover { background: #fff; border-color: #d4d0c5; }
+
+    /* Dashboard */
+    .main { width: min(100%, 1450px); margin: 0 auto; padding: 38px clamp(22px, 3.2vw, 48px) 62px; }
+    .hello { display: flex; align-items: flex-end; justify-content: space-between; gap: 26px; margin-bottom: 25px; }
+    .kicker, .eyebrow {
+      color: #6a806e;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.45px;
+      text-transform: uppercase;
+    }
+    .hello h1 {
+      max-width: 770px;
+      margin: 8px 0 9px;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: clamp(29px, 3vw, 40px);
+      font-weight: 500;
+      letter-spacing: -1.1px;
+      line-height: 1.08;
+    }
+    .hello p { max-width: 680px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .primary {
+      display: inline-flex;
+      min-height: 47px;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 11px 16px;
+      color: #fffdf8;
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .05px;
+      background: var(--forest);
+      border: 1px solid var(--forest);
+      border-radius: 10px;
+      box-shadow: 0 5px 13px rgba(49, 91, 73, .13);
+      transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease;
+    }
+    .primary:hover { background: var(--forest-dark); box-shadow: 0 7px 18px rgba(49, 91, 73, .2); transform: translateY(-1px); }
+    .primary svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 2; }
+    .hero {
+      position: relative;
+      display: flex;
+      min-height: 190px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      margin-bottom: 17px;
+      padding: 30px clamp(24px, 3vw, 38px);
+      overflow: hidden;
+      color: #fffaf0;
+      background: var(--forest-deep);
+      border: 1px solid #29493a;
+      border-radius: 21px;
+      box-shadow: var(--shadow-sm);
+      isolation: isolate;
+    }
+    .hero::before, .hero::after { position: absolute; z-index: -1; content: ""; pointer-events: none; }
+    .hero::before {
+      top: -170px;
+      right: 175px;
+      width: 340px;
+      height: 340px;
+      border: 1px solid rgba(236, 231, 207, .18);
+      border-radius: 50%;
+      box-shadow: 0 0 0 26px rgba(236, 231, 207, .035), 0 0 0 54px rgba(236, 231, 207, .025);
+    }
+    .hero::after {
+      right: 22%;
+      bottom: -77px;
+      width: 230px;
+      height: 115px;
+      background: rgba(194, 142, 91, .1);
+      border-radius: 50%;
+      filter: blur(1px);
+      transform: rotate(-23deg);
+    }
+    .hero-copy { position: relative; z-index: 1; max-width: 690px; }
+    .hero .kicker { color: #d8c58c; }
+    .hero h2 {
+      max-width: 650px;
+      margin: 8px 0 8px;
+      color: #fffaf0;
+      font-family: var(--serif);
+      font-size: clamp(23px, 2.2vw, 30px);
+      font-weight: 500;
+      letter-spacing: -.45px;
+      line-height: 1.18;
+    }
+    .hero p { max-width: 620px; margin: 0; color: rgba(255, 250, 240, .75); font-size: 12px; line-height: 1.65; }
+    .hero-art { position: relative; z-index: 1; flex: 0 0 195px; width: 195px; height: 120px; margin-right: 6px; }
+    .hero-art svg { width: 100%; height: 100%; overflow: visible; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 36px; }
+    .stat {
+      min-width: 0;
+      padding: 16px 18px 15px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 2px 7px rgba(40, 53, 44, .025);
+    }
+    .stat-label { display: block; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+    .stat b { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; color: var(--ink); font-size: 25px; font-weight: 700; letter-spacing: -.8px; line-height: 1.1; }
+    .stat small { color: var(--muted-soft); font-size: 10px; font-weight: 550; letter-spacing: 0; }
+    .section-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 0 0 15px; }
+    .section-title h2 { margin: 0; color: var(--ink); font-family: var(--serif); font-size: 23px; font-weight: 500; letter-spacing: -.25px; }
+    .section-title p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .library-note { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; font-weight: 650; }
+    .library-note svg { width: 15px; height: 15px; color: #77937c; fill: none; stroke: currentColor; stroke-width: 1.7; }
+    .modules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+    .module { min-width: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 3px 12px rgba(40, 53, 44, .035); transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+    .module:hover { border-color: #d6d8cd; box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .module:focus-visible { outline: 0; border-color: #96ae9b; box-shadow: var(--focus); }
+    .thumb { position: relative; display: grid; height: 148px; place-items: center; overflow: hidden; background: #e8eee7; }
+    .thumb::after { position: absolute; inset: auto 0 0; height: 1px; background: rgba(48, 69, 54, .08); content: ""; }
+    .thumb.c2 { background: #e9ecef; }
+    .thumb.c3 { background: #f0e9db; }
+    .thumb.c4 { background: #e9ede3; }
+    .thumb.c5 { background: #eee7e8; }
+    .thumb.c6 { background: #e5eceb; }
+    .thumb svg { width: min(82%, 230px); height: 112px; transition: transform .28s ease; }
+    .module:hover .thumb svg { transform: translateY(-3px); }
+    .type {
+      position: absolute;
+      top: 13px;
+      left: 13px;
+      padding: 5px 8px;
+      color: #526d5a;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: .75px;
+      background: rgba(255, 254, 250, .88);
+      border: 1px solid rgba(255, 254, 250, .85);
+      border-radius: 5px;
+    }
+    .module-body { padding: 15px 16px 13px; }
+    .module-status-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+    .status-chip, .scope-chip { display: inline-flex; align-items: center; min-height: 20px; padding: 3px 7px; color: #60695b; font-size: 8px; font-weight: 800; letter-spacing: .35px; background: #f0f1e8; border: 1px solid #e3e5d9; border-radius: 99px; }
+    .status-chip.status-in_review { color: #536c77; background: #eaf0f1; border-color: #d5e0e3; }
+    .status-chip.status-changes_requested { color: #875f36; background: #f8efe1; border-color: #eadcc6; }
+    .status-chip.status-approved { color: #3f684e; background: #e8f1e8; border-color: #d3e3d3; }
+    .status-chip.status-private { color: #6f6880; background: #f0edf5; border-color: #e3deec; }
+    .scope-chip { color: #73796d; font-size: 7px; background: #fffefa; }
+    .module-body h3 { overflow: hidden; margin: 0 0 8px; color: var(--ink); font-family: var(--serif); font-size: 18px; font-weight: 500; letter-spacing: -.15px; text-overflow: ellipsis; white-space: nowrap; }
+    .meta, .module-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 10px; }
+    .meta > span:first-child, .module-footer > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .meta > span:last-child { flex: 0 0 auto; }
+    .status-dot { display: inline-block; width: 7px; height: 7px; margin-right: 5px; vertical-align: 1px; background: #6e9674; border-radius: 50%; }
+    .module-footer { margin-top: 13px; padding-top: 11px; color: var(--muted-soft); border-top: 1px solid #eeece4; }
+    .module-footer > span:last-child { flex: 0 0 auto; font-size: 9px; }
+    .open-label { display: none; }
+    .empty {
+      display: flex;
+      grid-column: 1 / -1;
+      min-height: 204px;
+      align-items: center;
+      gap: 22px;
+      padding: 25px 28px;
+      background: var(--surface);
+      border: 1px dashed #d7d7ca;
+      border-radius: 16px;
+    }
+    .empty-art { display: grid; flex: 0 0 70px; width: 70px; height: 70px; place-items: center; color: var(--forest); background: var(--forest-soft); border-radius: 20px; }
+    .empty-art svg { width: 35px; height: 35px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+    .empty-copy { flex: 1; min-width: 0; }
+    .empty-copy .eyebrow { color: #788a78; }
+    .empty strong { display: block; margin: 5px 0 3px; color: var(--ink); font-family: var(--serif); font-size: 20px; font-weight: 500; }
+    .empty p { max-width: 560px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .empty .primary { margin-left: auto; }
+    .toast {
+      position: fixed;
+      z-index: 150;
+      bottom: 22px;
+      left: 50%;
+      max-width: min(90vw, 540px);
+      padding: 12px 17px;
+      color: #fffdf7;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      background: #294838;
+      border: 1px solid rgba(255, 255, 255, .13);
+      border-radius: 11px;
+      box-shadow: 0 10px 28px rgba(25, 48, 36, .2);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 12px);
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* Sign-in */
+    .auth-gate {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+      background: radial-gradient(circle at 14% 15%, rgba(213, 220, 199, .45), transparent 31%), var(--paper);
+    }
+    .auth-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(340px, .98fr);
+      width: min(100%, 960px);
+      min-height: 570px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid #e6e2d9;
+      border-radius: 23px;
+      box-shadow: 0 22px 70px rgba(40, 53, 44, .13);
+    }
+    .auth-visual {
+      position: relative;
+      display: flex;
+      min-height: 570px;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 35px 38px 31px;
+      overflow: hidden;
+      color: #fffaf0;
+      background: var(--forest-deep);
+      isolation: isolate;
+    }
+    .auth-visual::before, .auth-visual::after { position: absolute; z-index: -1; content: ""; pointer-events: none; }
+    .auth-visual::before {
+      right: -125px;
+      bottom: -120px;
+      width: 390px;
+      height: 390px;
+      border: 1px solid rgba(239, 233, 211, .19);
+      border-radius: 50%;
+      box-shadow: 0 0 0 25px rgba(239, 233, 211, .04), 0 0 0 52px rgba(239, 233, 211, .03);
+    }
+    .auth-visual::after { right: 12%; bottom: 22%; width: 80px; height: 80px; background: rgba(201, 158, 103, .2); border-radius: 50%; filter: blur(25px); }
+    .auth-brand { display: flex; align-items: center; gap: 11px; }
+    .auth-brand .logo-mark { width: 40px; height: 40px; flex-basis: 40px; color: var(--forest-deep); background: #efe5ca; box-shadow: none; }
+    .auth-brand .logo-mark svg { width: 22px; height: 22px; }
+    .auth-brand strong { display: block; font-size: 15px; letter-spacing: -.25px; }
+    .auth-brand small { display: block; margin-top: 3px; color: rgba(255, 250, 240, .64); font-size: 8px; font-weight: 750; letter-spacing: 1.1px; }
+    .auth-visual-copy { position: relative; z-index: 1; max-width: 400px; margin: 42px 0 22px; }
+    .auth-visual-copy .kicker { color: #d5c183; }
+    .auth-visual-copy h2 { margin: 12px 0 12px; font-family: var(--serif); font-size: clamp(30px, 4vw, 43px); font-weight: 500; letter-spacing: -.7px; line-height: 1.08; }
+    .auth-visual-copy p { max-width: 350px; margin: 0; color: rgba(255, 250, 240, .74); font-size: 12px; line-height: 1.75; }
+    .auth-steps { position: relative; display: flex; align-items: center; gap: 8px; color: rgba(255, 250, 240, .68); font-size: 10px; }
+    .auth-steps span { display: inline-flex; align-items: center; gap: 7px; }
+    .auth-steps i { display: inline-block; width: 6px; height: 6px; background: #d2b16d; border-radius: 50%; }
+    .auth-steps b { width: 20px; height: 1px; background: rgba(255, 250, 240, .28); }
+    .auth-panel { align-self: center; padding: 48px clamp(28px, 4.1vw, 50px); }
+    .auth-panel .auth-brand { display: none; }
+    .auth-panel h1 { margin: 0 0 6px; color: var(--ink); font-family: var(--serif); font-size: 31px; font-weight: 500; letter-spacing: -.65px; }
+    .auth-sub { margin: 0 0 27px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .auth-field { margin: 0 0 16px; }
+    .auth-field label { display: block; margin-bottom: 7px; color: var(--ink-soft); font-size: 11px; font-weight: 750; }
+    .auth-field input {
+      width: 100%;
+      min-height: 48px;
+      padding: 11px 13px;
+      color: var(--ink);
+      font-size: 13px;
+      background: #fff;
+      border: 1px solid #dddcd2;
+      border-radius: 9px;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .auth-field input::placeholder { color: #a0a49b; }
+    .auth-field input:focus { border-color: #78977d; }
+    .auth-submit { width: 100%; min-height: 49px; margin-top: 5px; font-size: 13px; }
+    .auth-submit:disabled { opacity: .7; }
+    .auth-error { min-height: 19px; margin: 11px 0 0; color: #a44539; font-size: 11px; line-height: 1.5; }
+    .auth-note { margin: 21px 0 0; padding-top: 17px; color: var(--muted-soft); font-size: 10px; line-height: 1.7; border-top: 1px solid #eeece5; }
+    .auth-note strong { color: var(--ink-soft); font-weight: 700; }
+
+    /* Lesson builder */
+    .overlay { position: fixed; z-index: 30; inset: 0; display: none; overflow-x: hidden; overflow-y: auto; background: var(--paper); overscroll-behavior: contain; }
+    .overlay.open { display: block; }
+    .builder-top {
+      position: sticky;
+      z-index: 8;
+      top: 0;
+      display: flex;
+      min-height: 70px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 9px clamp(14px, 2.4vw, 32px);
+      background: rgba(255, 254, 250, .94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(13px);
+    }
+    .builder-left { display: flex; min-width: 0; align-items: center; gap: 12px; }
+    .back {
+      display: grid;
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      color: var(--ink-soft);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      transition: background-color .18s ease, border-color .18s ease;
+    }
+    .back:hover { background: var(--surface-muted); border-color: #d5d4c9; }
+    .back svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .builder-brand { display: flex; align-items: center; gap: 9px; }
+    .builder-brand .logo-mark { width: 33px; height: 33px; flex-basis: 33px; border-radius: 10px 10px 10px 4px; }
+    .builder-brand .logo-mark svg { width: 18px; height: 18px; }
+    .builder-left strong { display: block; overflow: hidden; color: var(--ink); font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+    .saved { display: block; margin-top: 2px; color: var(--muted-soft); font-size: 10px; }
+    .format-chip {
+      display: inline-flex;
+      min-height: 40px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 7px 11px;
+      color: #56705d;
+      font-size: 10px;
+      font-weight: 750;
+      background: #edf1e9;
+      border: 1px solid #e2e9df;
+      border-radius: 9px;
+      white-space: nowrap;
+      transition: background-color .18s ease, border-color .18s ease;
+    }
+    .format-chip:hover { background: #e7eee5; border-color: #d5e1d3; }
+    .format-chip svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+    .builder-body { width: min(100%, 1460px); margin: 0 auto; padding: 29px clamp(15px, 2.4vw, 34px) 58px; }
+    .builder-heading { margin: 0 0 20px; }
+    .builder-heading .kicker { color: #76856f; }
+    .builder-heading h1 { margin: 6px 0 5px; color: var(--ink); font-family: var(--serif); font-size: clamp(26px, 2.7vw, 35px); font-weight: 500; letter-spacing: -.7px; line-height: 1.14; }
+    .builder-heading p { max-width: 760px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+    .steps {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      align-items: start;
+      gap: 5px;
+      margin-bottom: 15px;
+      padding: 14px 16px 11px;
+      overflow: hidden;
+      background: rgba(255, 254, 250, .88);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .steps-track { position: absolute; top: 28px; right: 8.5%; left: 8.5%; height: 2px; overflow: hidden; background: #e7e5dc; border-radius: 2px; }
+    .steps-track span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #6d9477, #c39b5f); border-radius: inherit; transition: width .3s ease; }
+    .step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 7px; padding: 0 2px; color: #8a9288; font-size: 9px; font-weight: 750; background: transparent; border: 0; cursor: pointer; }
+    .step i { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; color: #7b857b; font-size: 9px; font-style: normal; background: #f5f4ee; border: 1px solid #e2e2d8; border-radius: 50%; box-shadow: 0 0 0 5px #fffefa; transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease; }
+    .step span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .step.active { color: var(--forest); }
+    .step.active i { color: #fff; background: var(--forest); border-color: var(--forest); transform: translateY(-1px); }
+    .step.complete { color: #617760; }
+    .step.complete i { color: #fff; background: #849779; border-color: #849779; }
+    .step:disabled { cursor: not-allowed; opacity: .56; }
+    .step:focus-visible { outline: 2px solid #78977e; outline-offset: 4px; border-radius: 7px; }
+    .review-route { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: -3px 0 17px; padding: 11px 14px; background: linear-gradient(110deg, #f3f1e7, #f8f5eb); border: 1px solid #eae6d7; border-radius: 12px; }
+    .review-route-label { flex: 0 0 auto; color: #788266; font-size: 8px; font-weight: 850; letter-spacing: 1px; }
+    .review-route-flow { display: flex; flex: 1 1 auto; align-items: center; justify-content: flex-end; gap: 9px; color: var(--ink-soft); font-size: 9px; font-weight: 750; }
+    .review-route-flow span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .review-route-flow i { display: grid; width: 19px; height: 19px; place-items: center; color: #fff; font-size: 8px; font-style: normal; background: #7e9072; border-radius: 50%; }
+    .review-route-flow b { color: #ad9c77; font-size: 12px; font-weight: 500; }
+    .author-step-panel[hidden] { display: none !important; }
+    .author-step-panel:not([hidden]) { animation: author-step-in .22s ease both; }
+    @keyframes author-step-in { from { opacity: .55; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .field textarea.source-step-textarea { min-height: 252px; padding: 14px; font-size: 12px; line-height: 1.75; }
+    .source-field-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; color: var(--muted-soft); font-size: 9px; }
+    .source-field-meta span:last-child { color: #7b8974; font-weight: 700; }
+    .source-footer { margin-top: 18px; padding-top: 15px; border-top: 1px solid #efede5; }
+    .source-meter-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; color: var(--muted-soft); font-size: 9px; }
+    .source-meter-head strong { color: var(--ink-soft); font-size: 9px; font-weight: 750; }
+    .source-meter-head .over-limit { color: #a65344; }
+    .source-meter { height: 5px; overflow: hidden; background: #efeee6; border-radius: 10px; }
+    .source-meter span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #6d9477, #c39b5f); border-radius: inherit; transition: width .18s ease, background-color .18s ease; }
+    .source-meter.over-limit span { background: #b35d4c; }
+    .source-save-note { display: block; margin-top: 8px; color: var(--muted-soft); font-size: 9px; line-height: 1.5; }
+    .wizard-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 15px; }
+    .wizard-actions .secondary-action, .wizard-actions .primary { min-height: 43px; padding: 10px 14px; }
+    .wizard-action-main { display: flex; justify-content: flex-end; }
+    .wizard-actions .primary { display: inline-flex; align-items: center; gap: 8px; }
+    .wizard-actions [hidden] { display: none !important; }
+    .source-chip[data-state="saving"] { color: #8b6d3d; background: #faf2df; border-color: #eee2c3; }
+    .source-chip[data-state="saved"] { color: #55735e; background: #edf3eb; border-color: #dce8d9; }
+    .source-chip[data-state="error"] { color: #945347; background: #fbefeb; border-color: #edd9d3; }
+    .source-chip[data-state="saved"] i { background: #66866b; }
+    .source-chip[data-state="saving"] i { background: #c69a53; }
+    .source-chip[data-state="error"] i { background: #b35d4c; }
+    .wizard-actions .primary svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .wizard-actions .primary:disabled { opacity: .62; cursor: progress; }
+    .step-error { min-height: 16px; margin: 8px 0 0; color: #9a5549; font-size: 9px; }
+    .builder-grid { display: grid; grid-template-columns: minmax(340px, .92fr) minmax(440px, 1.08fr); align-items: start; gap: 18px; }
+    .card { min-width: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); }
+    .card-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px 16px; border-bottom: 1px solid #eeece4; }
+    .card-title h2 { margin: 4px 0 3px; color: var(--ink); font-family: var(--serif); font-size: 20px; font-weight: 500; letter-spacing: -.2px; }
+    .card-title p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .section-marker { color: #8b907f; font-size: 8px; font-weight: 800; letter-spacing: 1.15px; }
+    .source-chip { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; margin-top: 2px; padding: 6px 8px; color: #6a765e; font-size: 9px; font-weight: 750; background: #f2f1e8; border: 1px solid #e9e8dc; border-radius: 20px; }
+    .source-chip i { width: 6px; height: 6px; background: #819570; border-radius: 50%; }
+    .card-content { padding: 18px 20px 20px; }
+    .field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .field { min-width: 0; margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 6px; color: var(--ink-soft); font-size: 10px; font-weight: 750; }
+    .field .required-label { color: var(--terracotta); font-size: 9px; font-weight: 650; }
+    .field input, .field select, .field textarea {
+      display: block;
+      width: 100%;
+      min-height: 45px;
+      padding: 10px 11px;
+      color: var(--ink);
+      font-size: 11px;
+      background: #fff;
+      border: 1px solid #dddcd2;
+      border-radius: 9px;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .field input::placeholder, .field textarea::placeholder { color: #9aa098; opacity: 1; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #809d83; }
+    .field select { padding-right: 30px; }
+    .field textarea { min-height: 214px; resize: vertical; line-height: 1.65; }
+    .source-field-row .field textarea { min-height: 132px; }
+    .source-helper { margin: -2px 0 14px; }
+    .helper { margin-top: 7px; color: var(--muted-soft); font-size: 10px; line-height: 1.55; }
+    .template-lock {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 5px;
+      padding: 12px 13px;
+      color: #566a59;
+      font-size: 10px;
+      line-height: 1.55;
+      background: #f0f3eb;
+      border: 1px solid #e6ebdf;
+      border-radius: 10px;
+    }
+    .template-lock svg { flex: 0 0 17px; width: 17px; height: 17px; margin-top: 1px; fill: none; stroke: #68816a; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+    .build-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 17px; }
+    .build-actions > span { color: var(--muted); font-size: 10px; line-height: 1.45; }
+    .build-actions .primary { min-height: 45px; padding: 10px 13px; white-space: nowrap; }
+    .deck-panel { padding-bottom: 14px; }
+    .deck-top { display: flex; align-items: center; justify-content: space-between; gap: 13px; padding: 17px 18px 14px; }
+    .preview-tag { display: block; margin-bottom: 4px; color: #7a8a72; font-size: 8px; font-weight: 800; letter-spacing: 1.2px; }
+    .deck-top h2 { margin: 0 0 3px; overflow: hidden; color: var(--ink); font-family: var(--serif); font-size: 20px; font-weight: 500; letter-spacing: -.2px; text-overflow: ellipsis; white-space: nowrap; }
+    .deck-top small { display: block; max-width: 420px; overflow: hidden; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .deck-top .format-chip { flex: 0 0 auto; }
+    .slide-stage {
+      position: relative;
+      display: grid;
+      min-height: 340px;
+      align-items: center;
+      margin: 0 15px;
+      padding: 31px 34px;
+      overflow: hidden;
+      color: #f6fcf8;
+      background: #145e61;
+      border: 1px solid rgba(27, 49, 38, .12);
+      border-radius: 14px;
+      isolation: isolate;
+    }
+    .slide-stage::before, .slide-stage::after { position: absolute; z-index: -1; content: ""; border: 1px solid currentColor; border-radius: 50%; opacity: .08; pointer-events: none; }
+    .slide-stage::before { top: -112px; right: -57px; width: 260px; height: 260px; box-shadow: 0 0 0 20px rgba(255,255,255,.035), 0 0 0 44px rgba(255,255,255,.025); }
+    .slide-stage::after { right: 18%; bottom: -154px; width: 280px; height: 280px; }
+    .slide-stage.empty-stage { color: #2d4b39 !important; background: #e8eee5 !important; }
+    .slide-stage.empty-stage::before, .slide-stage.empty-stage::after { opacity: .14; }
+    .animation-canvas { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .stage-content { position: relative; z-index: 1; width: 59%; min-height: 225px; padding: 10px 6px 18px; }
+    .slide-stage.empty-stage .stage-content { width: min(100%, 620px); }
+    .slide-kicker { display: inline-flex; align-items: center; min-height: 25px; margin-bottom: 12px; padding: 4px 8px; color: currentColor; font-size: 8px; font-weight: 800; letter-spacing: 1.25px; text-transform: uppercase; background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 255, 255, .17); border-radius: 5px; }
+    .empty-stage .slide-kicker { background: rgba(49, 91, 73, .08); border-color: rgba(49, 91, 73, .09); }
+    .stage-content h2 { max-width: 520px; margin: 0 0 10px; font-family: var(--serif); font-size: clamp(26px, 2.8vw, 35px); font-weight: 500; letter-spacing: -.55px; line-height: 1.12; }
+    .stage-content p { max-width: 550px; margin: 0; color: currentColor; font-size: 12px; line-height: 1.75; opacity: .88; }
+    .stage-content .formula { display: inline-block; max-width: 100%; margin-top: 5px; padding: 12px 15px; font-family: var(--serif); font-size: 17px; line-height: 1.55; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.16); border-radius: 8px; }
+    .stage-content .steps-list { display: grid; gap: 8px; max-width: 540px; margin: 16px 0 0; padding-left: 21px; font-size: 11px; line-height: 1.55; }
+    .stage-content .steps-list li { padding-left: 4px; }
+    .stage-content .diagram { position: absolute; top: 4px; right: 7px; color: currentColor; font-family: var(--serif); font-size: 48px; line-height: 1; opacity: .2; }
+    .stage-content .number { position: absolute; right: 7px; bottom: -2px; color: currentColor; font-family: var(--serif); font-size: 43px; line-height: 1; opacity: .22; }
+    .empty-stage .stage-content .number { color: #315b49; opacity: .28; }
+    .transition-rise { animation: rise-in .32s cubic-bezier(.2,.7,.2,1) both; }
+    .transition-fade { animation: fade-in .28s ease both; }
+    .transition-slide { animation: slide-in .32s cubic-bezier(.2,.7,.2,1) both; }
+    .transition-none { animation: none; }
+    @keyframes rise-in { from { opacity: .45; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade-in { from { opacity: .3; } to { opacity: 1; } }
+    @keyframes slide-in { from { opacity: .4; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+    .player-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px; padding: 12px 14px 3px; }
+    .player-controls button {
+      display: inline-flex;
+      min-height: 43px;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 11px;
+      color: var(--ink-soft);
+      font-size: 10px;
+      font-weight: 750;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+    }
+    .player-controls button:hover { color: var(--forest-dark); background: #f5f5ed; border-color: #d6d9cd; }
+    .player-controls button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .player-controls .play {
+      min-width: 125px;
+      padding: 8px 15px;
+      color: #fffdf8;
+      font-size: 11px;
+      background: var(--forest);
+      border-color: var(--forest);
+    }
+    .player-controls .play:hover { color: #fff; background: var(--forest-dark); border-color: var(--forest-dark); }
+    .player-controls .slide-index { flex: 0 0 auto; min-width: 73px; color: var(--muted); font-size: 10px; font-weight: 700; text-align: center; }
+    .playback-settings { margin: 11px 15px 0; padding: 15px; background: #f7f6f0; border: 1px solid #eeece3; border-radius: 12px; }
+    .settings-heading { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+    .settings-icon { display: grid; flex: 0 0 30px; width: 30px; height: 30px; place-items: center; color: #607960; background: #e8eee3; border-radius: 9px; }
+    .settings-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+    .settings-heading strong { display: block; color: var(--ink); font-size: 11px; font-weight: 750; }
+    .settings-heading small { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .setting-control { display: grid; min-width: 0; gap: 5px; color: var(--ink-soft); font-size: 9px; font-weight: 700; }
+    .setting-control select {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      padding: 8px 30px 8px 10px;
+      color: var(--ink);
+      font-size: 10px;
+      font-weight: 550;
+      background-color: #fffefa;
+      border: 1px solid #e1dfd6;
+      border-radius: 8px;
+    }
+    .playback-meta { display: grid; gap: 3px; margin-top: 11px; }
+    .voice-status, .playback-hint, .motion-note { display: block; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .voice-status::before { display: inline-block; width: 6px; height: 6px; margin-right: 6px; vertical-align: 1px; background: #8ba184; border-radius: 50%; content: ""; }
+    .motion-note { color: var(--muted-soft); }
+    .slide-strip { display: flex; gap: 7px; margin: 13px 15px 0; padding: 0 0 3px; overflow-x: auto; scrollbar-color: #d5d9cd transparent; scrollbar-width: thin; }
+    .slide-mini {
+      display: flex;
+      min-width: 76px;
+      min-height: 43px;
+      flex: 1 0 76px;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 9px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+      text-align: center;
+      background: #fffefa;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .slide-mini.current { color: var(--forest-dark); background: #e8efe8; border-color: #cbd9c8; }
+    .slide-mini:disabled { cursor: default; opacity: .72; }
+    .slide-strip button.slide-mini { cursor: pointer; }
+    .script-list { display: none; margin: 13px 15px 0; }
+    .script-list.open { display: grid; gap: 10px; }
+    .script-slide { display: grid; gap: 8px; padding: 14px; background: #f7f6f0; border: 1px solid #e9e6dd; border-radius: 11px; }
+    .script-slide > span { color: #74836e; font-size: 8px; font-weight: 800; letter-spacing: 1px; }
+    .script-slide input, .script-slide textarea { width: 100%; padding: 9px 10px; color: var(--ink); font-size: 11px; background: #fff; border: 1px solid #dddcd2; border-radius: 8px; }
+    .script-slide textarea { min-height: 78px; resize: vertical; line-height: 1.55; }
+    .scene-review-note { padding: 8px 10px; color: #725837; font-size: 9px; line-height: 1.55; background: #fbf5e9; border: 1px solid #eee2ca; border-radius: 8px; }
+    .scene-review-note b { color: #69522f; }
+    .empty-script { padding: 13px; color: var(--muted); font-size: 10px; line-height: 1.55; background: #f7f6f0; border: 1px dashed #e2e0d7; border-radius: 10px; }
+    .animation-maker { display: grid; gap: 11px; margin: 13px 15px 0; padding: 14px; background: linear-gradient(135deg, #f1f3eb, #f7f4e9); border: 1px solid #e5e8dc; border-radius: 12px; }
+    .animation-maker-head { display: flex; align-items: flex-start; gap: 10px; }
+    .animation-spark { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; color: #fff9e8; background: var(--forest); border-radius: 11px 11px 11px 4px; }
+    .animation-spark svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+    .animation-maker-head strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 16px; font-weight: 500; }
+    .animation-maker-head p { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .ai-consent { display: flex; align-items: flex-start; gap: 8px; color: var(--muted); font-size: 9px; line-height: 1.55; cursor: pointer; }
+    .ai-consent input { flex: 0 0 16px; width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--forest); }
+    .animation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .animation-actions button { min-height: 41px; font-size: 10px; }
+    .animation-actions .primary { padding: 8px 12px; }
+    .animation-actions .secondary-action { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 11px; color: var(--ink-soft); font-weight: 700; background: #fffefa; border: 1px solid var(--line); border-radius: 9px; }
+    .animation-actions .secondary-action:hover { background: #f7f6f0; }
+    .animation-actions .secondary-action svg, .animation-actions .primary svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .animation-actions button:disabled { opacity: .55; }
+    .animation-status { color: #697565; font-size: 9px; line-height: 1.5; }
+    .animation-export-note { color: var(--muted-soft); font-size: 8px; line-height: 1.5; }
+    .workflow-card { display: grid; gap: 10px; margin: 13px 15px 0; padding: 14px; background: #fffefa; border: 1px solid var(--line); border-radius: 12px; }
+    .workflow-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .workflow-head strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 16px; font-weight: 500; }
+    .workflow-head p, .workflow-hint { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .workflow-state { flex: 0 0 auto; padding: 5px 8px; color: #5d6b5d; font-size: 8px; font-weight: 800; background: #eff1e8; border-radius: 999px; }
+    .workflow-state[data-status="in_review"] { color: #536c77; background: #eaf0f1; }
+    .workflow-state[data-status="changes_requested"] { color: #875f36; background: #f8efe1; }
+    .workflow-state[data-status="approved"] { color: #3f684e; background: #e8f1e8; }
+    .workflow-actions, .review-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .workflow-actions button, .review-actions button { min-height: 38px; padding: 8px 11px; font-size: 9px; }
+    .review-controls { display: grid; gap: 8px; padding-top: 9px; border-top: 1px solid #eeece4; }
+    .review-controls label { color: var(--ink-soft); font-size: 9px; font-weight: 700; }
+    .review-controls textarea { width: 100%; min-height: 72px; padding: 9px 10px; color: var(--ink); font-size: 10px; line-height: 1.5; background: #fff; border: 1px solid #dddcd2; border-radius: 8px; resize: vertical; }
+    .review-summary { padding: 9px 11px; color: #725837; font-size: 9px; line-height: 1.55; background: #fbf5e9; border: 1px solid #eee2ca; border-radius: 9px; }
+    .alert { margin: 13px 15px 0; padding: 12px 14px; color: #6e715f; font-size: 9px; line-height: 1.65; background: #f6f3e8; border: 1px solid #eee7d5; border-radius: 10px; }
+    .alert b { color: #566449; }
+    .render-note { max-width: 950px; margin: 19px auto 0; color: var(--muted-soft); font-size: 10px; line-height: 1.65; text-align: center; }
+
+    @media (max-width: 1190px) {
+      .builder-grid { grid-template-columns: minmax(0, 1fr); }
+      .deck-panel { width: 100%; }
+      .slide-stage { min-height: 320px; }
+      .modules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 900px) {
+      .side { flex-basis: 224px; width: 224px; padding-right: 13px; padding-left: 13px; }
+      .main { padding-top: 30px; }
+      .hero-art { flex-basis: 155px; width: 155px; }
+      .auth-card { grid-template-columns: minmax(0, .92fr) minmax(320px, 1.08fr); }
+      .auth-visual { padding-right: 29px; padding-left: 29px; }
+    }
+    @media (max-width: 760px) {
+      .shell { display: block; }
+      .side {
+        position: sticky;
+        z-index: 11;
+        top: 0;
+        display: grid;
+        width: 100%;
+        height: auto;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px 12px;
+        padding: 10px 15px 8px;
+        overflow: visible;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .logo { padding: 0; }
+      .logo-mark { width: 37px; height: 37px; flex-basis: 37px; border-radius: 12px 12px 12px 4px; }
+      .logo strong { font-size: 14px; }
+      .logo small { display: none; }
+      .side > .nav-label, .nav-workflow, .side-bottom { display: none; }
+      .nav-primary { grid-column: 1 / -1; display: flex; gap: 5px; overflow-x: auto; padding-bottom: 1px; scrollbar-width: none; }
+      .nav-primary::-webkit-scrollbar { display: none; }
+      .nav button { min-height: 41px; flex: 0 0 auto; gap: 8px; padding: 7px 10px; font-size: 10px; }
+      .nav button svg { width: 16px; height: 16px; flex-basis: 16px; }
+      .layout { width: 100%; }
+      .top { position: relative; height: 58px; padding: 0 17px; }
+      .main { padding: 27px 17px 46px; }
+      .hello { align-items: flex-start; flex-direction: column; gap: 17px; margin-bottom: 20px; }
+      .hello h1 { max-width: 590px; font-size: clamp(29px, 7vw, 37px); }
+      .hello p { font-size: 12px; }
+      .hero { min-height: 170px; padding: 24px 23px; border-radius: 17px; }
+      .hero-art { flex-basis: 130px; width: 130px; height: 100px; }
+      .stats { gap: 8px; margin-bottom: 30px; }
+      .stat { padding: 13px 12px; }
+      .stat-label { font-size: 8px; letter-spacing: .45px; }
+      .stat b { gap: 5px; font-size: 22px; }
+      .stat small { font-size: 9px; }
+      .section-title h2 { font-size: 21px; }
+      .modules { gap: 12px; }
+      .thumb { height: 130px; }
+      .builder-top { min-height: 62px; }
+      .builder-body { padding-top: 23px; }
+      .steps { padding-right: 12px; padding-left: 12px; }
+      .review-route { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .review-route-flow { justify-content: flex-start; flex-wrap: wrap; }
+      .empty { flex-wrap: wrap; }
+      .empty .primary { margin-left: 92px; }
+    }
+    @media (max-width: 560px) {
+      .auth-gate { align-items: flex-start; padding: 14px; }
+      .auth-card { display: flex; flex-direction: column; min-height: 0; border-radius: 18px; }
+      .auth-visual { min-height: 0; padding: 22px 23px 24px; }
+      .auth-visual-copy { margin: 27px 0 0; }
+      .auth-visual-copy h2 { max-width: 390px; margin: 8px 0; font-size: 29px; }
+      .auth-visual-copy p { font-size: 11px; }
+      .auth-steps { display: none; }
+      .auth-panel { padding: 27px 23px 25px; }
+      .auth-panel .auth-brand { display: none; }
+      .auth-panel h1 { font-size: 27px; }
+      .auth-sub { margin-bottom: 19px; }
+      .auth-note { margin-top: 17px; padding-top: 13px; }
+      .signed-email { display: none; }
+      .top-right { gap: 8px; }
+      .top-right .avatar { width: 31px; height: 31px; flex-basis: 31px; }
+      .signout { min-height: 38px; padding: 6px 9px; font-size: 10px; }
+      .main { padding-right: 14px; padding-left: 14px; }
+      .hero { min-height: 0; padding: 22px 20px; }
+      .hero-art { display: none; }
+      .hero h2 { font-size: 24px; }
+      .hero p { font-size: 11px; }
+      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .stat { padding: 12px 9px; }
+      .stat-label { min-height: 28px; line-height: 1.35; }
+      .stat b { align-items: flex-start; flex-direction: column; gap: 2px; margin-top: 5px; font-size: 20px; }
+      .modules { grid-template-columns: minmax(0, 1fr); }
+      .thumb { height: 145px; }
+      .empty { min-height: 0; gap: 13px; padding: 19px; }
+      .empty-art { flex-basis: 54px; width: 54px; height: 54px; border-radius: 15px; }
+      .empty-art svg { width: 29px; height: 29px; }
+      .empty-copy { flex-basis: calc(100% - 75px); }
+      .empty strong { font-size: 18px; }
+      .empty p { font-size: 10px; }
+      .empty .primary { margin: 3px 0 0; }
+      .builder-top { gap: 9px; padding-right: 11px; padding-left: 11px; }
+      .builder-left { gap: 8px; }
+      .back { flex-basis: 40px; width: 40px; height: 40px; }
+      .builder-brand .logo-mark { display: none; }
+      .builder-left strong { max-width: 45vw; font-size: 11px; }
+      .saved { max-width: 45vw; overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+      .builder-top > div:last-child .format-chip { min-height: 38px; padding: 6px 8px; font-size: 9px; }
+      .builder-body { padding: 20px 12px 40px; }
+      .builder-heading h1 { font-size: 27px; }
+      .builder-heading p { font-size: 11px; }
+      .steps { grid-template-columns: repeat(6, minmax(66px, 1fr)); gap: 3px; padding: 11px 8px 9px; overflow-x: auto; scrollbar-width: thin; }
+      .steps-track { top: 25px; right: 37px; left: 37px; }
+      .step { gap: 6px; font-size: 8px; }
+      .step i { width: 25px; height: 25px; flex-basis: 25px; box-shadow: 0 0 0 4px #fffefa; }
+      .review-route-flow { gap: 7px; font-size: 8px; }
+      .review-route-flow span { gap: 4px; }
+      .field textarea.source-step-textarea { min-height: 218px; }
+      .wizard-actions .secondary-action, .wizard-actions .primary { min-height: 45px; }
+      .builder-grid { gap: 13px; }
+      .card-title { padding: 15px 14px 13px; }
+      .card-title h2 { font-size: 19px; }
+      .card-title p { max-width: 255px; }
+      .source-chip { padding: 5px 7px; font-size: 8px; }
+      .card-content { padding: 15px 14px 16px; }
+      .field-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      .field textarea { min-height: 190px; }
+      .source-field-row .field textarea { min-height: 150px; }
+      .build-actions { align-items: stretch; flex-direction: column; }
+      .build-actions > span { order: 1; }
+      .build-actions .primary { width: 100%; order: 0; }
+      .wizard-actions { flex-wrap: wrap; }
+      .wizard-action-main { flex: 1 1 100%; }
+      .wizard-action-main .primary { width: 100%; justify-content: center; }
+      .wizard-actions .secondary-action { min-width: 91px; }
+      .wizard-actions #wizardStepCounter { margin-left: auto; }
+      .source-field-meta { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .deck-top { padding: 15px 13px 12px; }
+      .deck-top h2 { max-width: 58vw; font-size: 18px; }
+      .deck-top small { max-width: 58vw; font-size: 8px; }
+      .deck-top .format-chip { min-height: 38px; padding: 6px 8px; font-size: 9px; }
+      .slide-stage { min-height: 290px; margin: 0 10px; padding: 23px 20px; }
+      .stage-content { width: 100%; min-height: 220px; padding: 8px 4px 16px; }
+      .animation-canvas { opacity: .58; }
+      .stage-content h2 { max-width: 100%; font-size: 27px; }
+      .stage-content p { font-size: 11px; }
+      .stage-content .steps-list { font-size: 10px; }
+      .stage-content .diagram { top: 0; right: 0; font-size: 39px; }
+      .stage-content .number { right: 0; font-size: 37px; }
+      .player-controls { gap: 6px; padding-right: 9px; padding-left: 9px; }
+      .player-controls button { min-height: 42px; gap: 5px; padding: 7px 8px; font-size: 9px; }
+      .player-controls .play { min-width: 114px; padding-right: 10px; padding-left: 10px; }
+      .player-controls .slide-index { min-width: 65px; }
+      .playback-settings { margin-right: 10px; margin-left: 10px; padding: 12px; }
+      .slide-strip, .script-list, .alert, .animation-maker, .workflow-card { margin-right: 10px; margin-left: 10px; }
+      .animation-maker, .workflow-card { padding: 12px; }
+      .animation-actions button { width: 100%; }
+      .settings-grid { grid-template-columns: minmax(0, 1fr); }
+      .setting-control select { min-height: 44px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="auth-gate" id="authGate" style="display:flex" aria-labelledby="authHeading">
+    <section class="auth-card" aria-label="Vriddhi Lesson Studio sign in">
+      <div class="auth-visual">
+        <div class="auth-brand">
+          <div class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 12 4l8 15H4Z"/><path d="M8.5 15h7M12 11l4 8"/></svg>
+          </div>
+          <div><strong>Vriddhi Lesson Studio</strong><small>YOUR ACADEMIC WORKSPACE</small></div>
+        </div>
+        <div class="auth-visual-copy">
+          <div class="kicker">A CLEARER WAY TO TEACH</div>
+          <h2>Make room for the idea to land.</h2>
+          <p>Bring your own prepared explanations, examples and formulas. Shape them into a calm, consistent lesson—one slide at a time.</p>
+        </div>
+        <div class="auth-steps" aria-label="Seven-slide lesson flow">
+          <span><i></i>Prepared notes</span><b></b><span><i></i>Seven clear slides</span><b></b><span><i></i>Your review</span>
+        </div>
+      </div>
+      <div class="auth-panel">
+        <h1 id="authHeading">Welcome back.</h1>
+        <p class="auth-sub">Sign in to the internal lesson workspace.</p>
+        <form onsubmit="signIn(event)">
+          <div class="auth-field">
+            <label for="loginEmail">Email address</label>
+            <input id="loginEmail" type="email" autocomplete="username" placeholder="you@college.edu" required>
+          </div>
+          <div class="auth-field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+          </div>
+          <button class="primary auth-submit" id="loginButton" type="submit">Sign in <span aria-hidden="true">→</span></button>
+          <p class="auth-error" id="authError" role="alert" aria-live="polite"></p>
+        </form>
+        <p class="auth-note"><strong>Internal by design.</strong> Access is managed by approved team roles. Shared drafts are visible to authorized staff; there is no student or customer publishing in this prototype.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="shell" id="home" style="display:none">
+    <aside class="side" aria-label="Workspace navigation">
+      <div class="logo">
+        <div class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 12 4l8 15H4Z"/><path d="M8.5 15h7M12 11l4 8"/></svg>
+        </div>
+        <div><strong>Vriddhi Studio</strong><small>ACADEMIC EXPLAINER BUILDER</small></div>
+      </div>
+      <div class="nav-label">Studio</div>
+      <nav class="nav nav-primary" aria-label="Studio">
+        <button class="active" type="button" data-nav="Dashboard" aria-current="page">
+          <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.5"/><rect x="13.5" y="10.5" width="7" height="10" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+          Dashboard
+        </button>
+        <button type="button" data-nav="My lessons">
+          <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 17a2.5 2.5 0 0 1 2.5-2.5H20M8 7h8M8 10h7"/></svg>
+          Internal queue <span id="lessonCount">0</span>
+        </button>
+        <button type="button" data-nav="Template">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
+          Slide templates
+        </button>
+      </nav>
+      <div class="nav-label nav-workflow">Your workflow</div>
+      <nav class="nav nav-workflow" aria-label="Lesson workflow">
+        <button type="button" onclick="showToast('Paste your prepared notes; Lesson Studio organizes them into a consistent lesson deck.')">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>
+          Paste notes
+        </button>
+        <button type="button" onclick="showToast('Formula, example, shortcut and recap follow the same lesson flow across subjects.')">
+          <svg viewBox="0 0 24 24"><path d="M7 4h10M9 4 5 20m10-16 4 16M7 13h10"/></svg>
+          Explain concepts
+        </button>
+      </nav>
+      <div class="side-bottom">
+        <div class="plan">
+          <div class="plan-head"><i class="plan-dot" aria-hidden="true"></i><span>Internal workspace</span></div>
+          <p>Team drafts are shared for review. Approval here does not publish content to customers.</p>
+        </div>
+        <div class="profile">
+          <div class="avatar" aria-hidden="true">ME</div>
+          <div><strong>Content team</strong><small id="workspaceRole">Checking workspace role…</small></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="layout">
+      <header class="top">
+        <div class="crumb">Vriddhi Studio<span class="crumb-separator">/</span><b>Dashboard</b></div>
+        <div class="top-right">
+          <span class="signed-email" id="signedInEmail">Signed in</span>
+          <div class="avatar" id="userAvatar" aria-label="Signed-in user">ME</div>
+          <button class="signout" type="button" onclick="signOut()">Sign out</button>
+        </div>
+      </header>
+      <div class="main">
+        <section class="hello" aria-labelledby="welcomeHeading">
+          <div>
+            <div class="kicker">INTERNAL CONTENT AUTHORING</div>
+            <h1 id="welcomeHeading">Create together. Review before internal approval.</h1>
+            <p>Draft animated lessons from prepared course material, share them with the team and require an independent review before internal approval.</p>
+          </div>
+          <button class="primary" id="buildLessonButton" type="button" onclick="openBuilder()">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            New internal draft
+          </button>
+        </section>
+
+        <section class="hero" aria-labelledby="heroHeading">
+          <div class="hero-copy">
+            <div class="kicker">A SHARED EDITORIAL WORKFLOW</div>
+            <h2 id="heroHeading">One clear lesson. A second pair of eyes.</h2>
+            <p>Keep course notes at the centre, turn them into animated scenes, and route every AI-assisted draft through a human reviewer.</p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 200 120" fill="none">
+              <path d="M24 93V30c0-5 4-9 9-9h83c5 0 9 4 9 9v63" stroke="#D7D8BE" stroke-width="1.5" opacity=".72"/>
+              <path d="M35 39h53M35 49h68M35 59h42" stroke="#D7D8BE" stroke-width="2" stroke-linecap="round" opacity=".76"/>
+              <path d="M35 77c12-10 22-10 32-1 10 9 21 6 33-8" stroke="#D6B773" stroke-width="2.4" stroke-linecap="round"/>
+              <circle cx="101" cy="68" r="8" fill="#D6B773"/>
+              <path d="M136 36h39M136 47h30M136 58h35" stroke="#B9C5A9" stroke-width="2" stroke-linecap="round"/>
+              <rect x="133" y="72" width="45" height="29" rx="7" fill="#F1E7CE" fill-opacity=".1" stroke="#D7D8BE" stroke-opacity=".5"/>
+              <path d="m146 87 5 5 13-14" stroke="#E0C47E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="174" cy="22" r="3" fill="#D6B773"/>
+              <path d="M13 104h173" stroke="#C4C9B2" stroke-opacity=".35" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </section>
+
+        <section class="stats" aria-label="Workspace overview">
+          <div class="stat">
+            <span class="stat-label">Shared internal lessons</span>
+            <b id="statLessons">0<small>in workspace</small></b>
+          </div>
+          <div class="stat">
+            <span class="stat-label">A human review gate</span>
+            <b>03<small>access roles</small></b>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Fixed lesson structure</span>
+            <b>07<small>animated scenes</small></b>
+          </div>
+        </section>
+
+        <section aria-labelledby="libraryHeading">
+          <div class="section-title">
+            <div>
+              <h2 id="libraryHeading">Internal review queue</h2>
+              <p>Shared with approved team members. Only authors edit drafts; a different reviewer approves them.</p>
+            </div>
+            <div class="library-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 2.9 8 7 10 4.1-2 7-5.2 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+              Internal only · no customer publishing
+            </div>
+          </div>
+          <div class="modules" id="modules" aria-live="polite"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="builder" role="dialog" aria-modal="true" aria-labelledby="builderTitle">
+    <header class="builder-top">
+      <div class="builder-left">
+        <button class="back" type="button" onclick="closeBuilder()" aria-label="Close lesson builder" title="Back to dashboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h11"/></svg>
+        </button>
+        <div class="builder-brand" aria-hidden="true">
+          <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 12 4l8 15H4Z"/><path d="M8.5 15h7M12 11l4 8"/></svg></div>
+        </div>
+        <div>
+          <strong id="builderTitle">New internal lesson</strong>
+          <span class="saved" id="draftScopeLabel">Shared team draft · not published to customers</span>
+        </div>
+      </div>
+      <div>
+        <button class="format-chip" type="button" onclick="showToast('The seven-slide lesson flow stays consistent across all three visual themes.')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
+          3 slide themes
+        </button>
+      </div>
+    </header>
+
+    <div class="builder-body">
+      <div class="builder-heading">
+        <div class="kicker">INTERNAL LESSON AUTHORING</div>
+        <h1>Build a stronger lesson, one clear step at a time.</h1>
+        <p>Move from the topic brief to the explanation, formulas, example, memory cues, and solution steps. Every shared draft stays internal until a different reviewer approves it.</p>
+      </div>
+
+      <div class="review-route" aria-label="Internal quality and approval path">
+        <span class="review-route-label">HUMAN REVIEW GATE</span>
+        <div class="review-route-flow">
+          <span><i>1</i>Author draft</span><b aria-hidden="true">→</b>
+          <span><i>2</i>Independent reviewer</span><b aria-hidden="true">→</b>
+          <span><i>3</i>Internal approval</span>
+        </div>
+      </div>
+
+      <div class="steps" id="authoringStepper" role="group" aria-label="Six lesson authoring steps">
+        <div class="steps-track" aria-hidden="true"><span id="authoringProgress"></span></div>
+        <button class="step active" id="authorStepNav1" type="button" aria-label="Step 1: Topic brief" aria-current="step" onclick="goToAuthoringStep(0)"><i>01</i><span>Brief</span></button>
+        <button class="step" id="authorStepNav2" type="button" aria-label="Step 2: Explanation" disabled onclick="goToAuthoringStep(1)"><i>02</i><span>Explain</span></button>
+        <button class="step" id="authorStepNav3" type="button" aria-label="Step 3: Formulas and key terms" disabled onclick="goToAuthoringStep(2)"><i>03</i><span>Formula</span></button>
+        <button class="step" id="authorStepNav4" type="button" aria-label="Step 4: Worked examples" disabled onclick="goToAuthoringStep(3)"><i>04</i><span>Examples</span></button>
+        <button class="step" id="authorStepNav5" type="button" aria-label="Step 5: Tricks and shortcuts" disabled onclick="goToAuthoringStep(4)"><i>05</i><span>Memory</span></button>
+        <button class="step" id="authorStepNav6" type="button" aria-label="Step 6: How to solve" disabled onclick="goToAuthoringStep(5)"><i>06</i><span>Steps</span></button>
+      </div>
+
+      <div class="builder-grid">
+        <section class="card input-card" aria-labelledby="authorStepTitle">
+          <div class="card-title">
+            <div>
+              <span class="section-marker" id="authorStepKicker">01 · TOPIC BRIEF</span>
+              <h2 id="authorStepTitle" tabindex="-1">Set the lesson brief</h2>
+              <p id="authorStepDescription">Start with the course context and a concise description of what learners should understand.</p>
+            </div>
+            <span class="source-chip" id="sourceSaveStatus" aria-live="polite"><i aria-hidden="true"></i>New draft</span>
+          </div>
+          <div class="card-content">
+            <section class="author-step-panel" id="authorStep1" aria-labelledby="authorStepTitle">
+              <div class="field-row">
+                <div class="field">
+                  <label for="program">Program</label>
+                  <select id="program" onchange="queueSave()">
+                    <option>B.Com</option>
+                    <option>B.Sc</option>
+                    <option>BBA</option>
+                    <option>BA</option>
+                    <option>B.E. / B.Tech</option>
+                    <option>Other degree program</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="branch">Branch / specialization</label>
+                  <input id="branch" placeholder="e.g. CSE, Finance, Physics" oninput="queueSave()">
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="subject">Subject</label>
+                  <input id="subject" placeholder="e.g. Data Structures" oninput="queueSave()">
+                </div>
+                <div class="field">
+                  <label for="module">Module / unit</label>
+                  <input id="module" placeholder="e.g. Module 2 · Trees and graphs" oninput="queueSave()">
+                </div>
+              </div>
+              <div class="field">
+                <label for="topic">Lesson topic <span class="required-label">Required</span></label>
+                <input id="topic" placeholder="e.g. Price elasticity of demand" required oninput="queueSave()">
+              </div>
+              <div class="field">
+                <label for="topicBriefNotes">Topic brief</label>
+                <textarea class="source-step-textarea" id="topicBriefNotes" rows="9" placeholder="Paste a short syllabus brief or describe the scope: what the lesson covers, why it matters, and what a learner should be able to do…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Use this as the lesson’s north star; detailed teaching notes come in the next steps.</span><span id="topicBriefCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep2" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="explanationNotes">Explanation / concept</label>
+                <textarea class="source-step-textarea" id="explanationNotes" rows="12" placeholder="Explain the idea in a clear sequence. Define unfamiliar words and connect the concept to something the learner already knows…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Keep one central idea in focus; the preview builds the concept scene from this section.</span><span id="explanationCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep3" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="formulaNotes">Formulas &amp; key terms</label>
+                <textarea class="source-step-textarea" id="formulaNotes" rows="12" placeholder="Add the formula, define every symbol, and note the conditions where it applies…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Include units, sign conventions, assumptions, or common notation.</span><span id="formulaCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep4" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="exampleNotes">Worked examples</label>
+                <textarea class="source-step-textarea" id="exampleNotes" rows="12" placeholder="Show one or more questions, the working, and each final answer. Explain why the steps are taken…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Keep the working visible so a reviewer can verify the method and answer.</span><span id="exampleCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep5" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="trickNotes">Tricks, shortcuts &amp; memory cues</label>
+                <textarea class="source-step-textarea" id="trickNotes" rows="12" placeholder="Add a useful mnemonic, pattern, shortcut, or common pitfall—and when it is safe to use…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Flag shortcuts that have exceptions or should not replace the full method.</span><span id="trickCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep6" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="solveNotes">How to solve / steps</label>
+                <textarea class="source-step-textarea" id="solveNotes" rows="12" placeholder="Write the method in order: what to identify, which relationship to use, how to calculate, and how to check the answer…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Use numbered actions learners can follow independently.</span><span id="solveCount">0 chars</span></div>
+              </div>
+              <div class="template-lock">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                <span>The seven-scene sequence stays consistent. You can review every scene before submitting the draft for independent approval.</span>
+              </div>
+            </section>
+
+            <div class="source-footer">
+              <div class="source-meter-head"><strong>Source material</strong><span id="sourceTotalCount" aria-live="polite">0 / 24,000 characters</span></div>
+              <div class="source-meter" id="sourceMeter" role="progressbar" aria-label="Source material character limit" aria-valuemin="0" aria-valuemax="24000" aria-valuenow="0"><span id="sourceMeterFill"></span></div>
+              <small class="source-save-note" id="buildHint">New lesson content is saved to the shared queue when you finish the steps.</small>
+            </div>
+            <p class="step-error" id="authoringStepError" aria-live="polite"></p>
+            <div class="wizard-actions">
+              <button class="secondary-action" id="authorStepPrev" type="button" onclick="goToAuthoringStep(authoringStep-1)" hidden>← Back</button>
+              <span id="wizardStepCounter" class="source-save-note">Step 1 of 6</span>
+              <div class="wizard-action-main">
+                <button class="primary" id="authorStepNext" type="button" onclick="goToAuthoringStep(authoringStep+1)">Next: Explanation <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                <button class="primary" id="createLessonButton" type="button" onclick="generateDeck()" hidden>Create draft &amp; build preview <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card deck-panel" aria-labelledby="deckTitle">
+          <div class="deck-top">
+            <div>
+              <span class="preview-tag">LESSON PREVIEW</span>
+              <h2 id="deckTitle">Lesson preview</h2>
+              <small id="deckSub">Your seven-slide sequence appears here.</small>
+            </div>
+            <button class="format-chip" type="button" onclick="toggleScript()" id="scriptToggle" aria-controls="scriptList">Edit script</button>
+          </div>
+          <div class="slide-stage empty-stage" id="stage" data-template="campus" aria-live="polite" aria-label="Current lesson slide">
+            <canvas class="animation-canvas" id="animationCanvas" aria-hidden="true"></canvas>
+            <div class="stage-content" id="stageContent">
+              <div class="slide-kicker">YOUR LESSON PREVIEW</div>
+              <h2>One clear idea at a time.</h2>
+              <p>Start with the topic brief, move through each source section, then build a review-ready lesson.</p>
+              <div class="number">01</div>
+            </div>
+          </div>
+          <div class="player-controls" role="group" aria-label="Slide playback controls">
+            <button type="button" onclick="prevSlide()" aria-label="Previous slide" title="Previous slide">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 18-6-6 6-6"/></svg><span>Prev</span>
+            </button>
+            <button class="play" id="playBtn" type="button" onclick="togglePlay()" aria-label="Play slideshow">▶ Play slides</button>
+            <button type="button" onclick="stopPlay()" aria-label="Stop slideshow" title="Stop slideshow">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span>Stop</span>
+            </button>
+            <button type="button" onclick="nextSlide()" aria-label="Next slide" title="Next slide">
+              <span>Next</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 18 6-6-6-6"/></svg>
+            </button>
+            <button type="button" onclick="speakSlide()" aria-label="Read current slide aloud" title="Read current slide aloud">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Z"/><path d="M17 9a5 5 0 0 1 0 6m2-9a9 9 0 0 1 0 12"/></svg><span>Voice</span>
+            </button>
+            <span class="slide-index" id="slideIndex">No slides yet</span>
+          </div>
+
+          <section class="playback-settings" aria-label="Playback and appearance settings">
+            <div class="settings-heading">
+              <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h9m4 0h3M4 17h3m4 0h9M13 4v6M7 14v6"/></svg></span>
+              <span><strong>Playback &amp; appearance</strong><small>Fine-tune how this lesson looks and sounds on your device.</small></span>
+            </div>
+            <div class="settings-grid">
+              <label class="setting-control" for="templateSelect"><span>Slide theme</span>
+                <select id="templateSelect" onchange="setTemplate(this.value)">
+                  <option value="campus">Campus</option>
+                  <option value="notebook">Notebook</option>
+                  <option value="midnight">Midnight</option>
+                </select>
+              </label>
+              <label class="setting-control" for="voicePreference"><span>Narration voice</span>
+                <select id="voicePreference" onchange="setVoicePreference(this.value)">
+                  <option value="auto">Auto</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                </select>
+              </label>
+              <label class="setting-control" for="transitionStyle"><span>Slide transition</span>
+                <select id="transitionStyle" onchange="setTransitionStyle(this.value)">
+                  <option value="rise">Gentle rise</option>
+                  <option value="fade">Fade</option>
+                  <option value="slide">Slide in</option>
+                  <option value="none">None</option>
+                </select>
+              </label>
+              <label class="setting-control" for="transitionPause"><span>Pause after narration</span>
+                <select id="transitionPause" onchange="setTransitionPause(this.value)">
+                  <option value="0">No pause</option>
+                  <option value="2000" selected>2 seconds</option>
+                  <option value="4000">4 seconds</option>
+                  <option value="6000">6 seconds</option>
+                </select>
+              </label>
+            </div>
+            <div class="playback-meta">
+              <small class="voice-status" id="voiceStatus" aria-live="polite">Loading available voices…</small>
+              <small class="playback-hint" id="playbackHint" aria-live="polite">Each slide stays up for its narration plus 2 sec.</small>
+              <small class="motion-note">Transitions respect your device’s reduced-motion setting.</small>
+            </div>
+          </section>
+
+          <div class="slide-strip" id="slideStrip" role="group" aria-label="Seven-slide lesson sequence">
+            <button class="slide-mini" type="button" disabled>Title</button>
+            <button class="slide-mini" type="button" disabled>Core idea</button>
+            <button class="slide-mini" type="button" disabled>Steps</button>
+            <button class="slide-mini" type="button" disabled>Formula</button>
+            <button class="slide-mini" type="button" disabled>Example</button>
+            <button class="slide-mini" type="button" disabled>Memory cue</button>
+            <button class="slide-mini" type="button" disabled>Recap</button>
+          </div>
+          <section class="workflow-card" aria-labelledby="workflowHeading">
+            <div class="workflow-head">
+              <div>
+                <strong id="workflowHeading">Team review status</strong>
+                <p id="workflowHint">Save a shared draft, then submit it for a different reviewer. Approval is internal only.</p>
+              </div>
+              <span class="workflow-state" id="workflowState" data-status="draft">Not saved</span>
+            </div>
+            <div class="review-summary" id="reviewSummaryDisplay" hidden></div>
+            <div class="workflow-actions">
+              <button class="secondary-action" id="shareDraftButton" type="button" onclick="sharePrivateDraft()" hidden>Copy private draft to team queue</button>
+              <button class="primary" id="submitReviewButton" type="button" onclick="submitForInternalReview()" hidden>Submit for review</button>
+            </div>
+            <div class="review-controls" id="reviewControls" hidden>
+              <label for="internalReviewSummary">Reviewer note <span class="required-label">Required if requesting changes</span></label>
+              <textarea id="internalReviewSummary" maxlength="1200" placeholder="Check the explanation against the source notes. Note any formula, example or course-specific fact that needs correction."></textarea>
+              <div class="review-actions">
+                <button class="secondary-action" id="requestChangesButton" type="button" onclick="reviewInternalLesson('request_changes')">Request changes</button>
+                <button class="primary" id="approveLessonButton" type="button" onclick="reviewInternalLesson('approve')">Approve internally</button>
+              </div>
+            </div>
+            <small class="workflow-hint">Approved lessons remain inside this internal prototype. No customer-facing publish route is enabled.</small>
+          </section>
+          <section class="animation-maker" aria-labelledby="animationHeading">
+            <div class="animation-maker-head">
+              <span class="animation-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span>
+              <span><strong id="animationHeading">Animate the explanation</strong><p>Gemini can turn your notes into a plain-language story, then our own vector scenes bring each idea to life.</p></span>
+            </div>
+            <label class="ai-consent" for="aiConsent"><input id="aiConsent" type="checkbox"><span>I agree to send this lesson’s notes to Google Gemini to create simplified explanations and an animated storyboard.</span></label>
+            <div class="animation-actions">
+              <button class="primary" id="animateButton" type="button" onclick="generateAnimatedLesson()" disabled>
+                Create animated explanation <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>
+              </button>
+              <button class="secondary-action" id="exportVideoButton" type="button" onclick="downloadAnimatedVideo()" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>Export animated video
+              </button>
+            </div>
+            <small class="animation-status" id="animationStatus" aria-live="polite">First arrange and save your lesson notes. AI output should be reviewed before teaching.</small>
+            <small class="animation-export-note">Notes are sent to Gemini only when you consent and generate. WebM export includes animated visuals and captions; browser narration plays in the preview but is not embedded in the export yet.</small>
+          </section>
+
+          <div class="script-list" id="scriptList">
+            <div class="empty-script">Arrange your notes first. Then edit the slide headings and narration text here.</div>
+          </div>
+          <div class="alert"><b>Review note:</b> Gemini can add plain-language context and examples, but AI output may be wrong. Check every formula, example and course-specific claim before teaching. Animations are built from safe, pre-defined vector scenes—not generated code.</div>
+        </section>
+      </div>
+      <p class="render-note">Shared internal drafts are readable only by approved staff and are written through Firebase Functions. Keep student-identifiable information out unless your institution has approved its use.</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-functions-compat.js" defer></script>
+  <script src="/firebase-config.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

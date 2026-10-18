@@ -353,6 +353,198 @@ function testFallbackTimingAndPacingControl() {
   assert.equal(app.getElement('transitionPause').value, '4000');
 }
 
+function testAnimatedExplainerIsConsentGatedAndHasVideoExportControls() {
+  assert.match(htmlSource, /id="animationCanvas"/, 'the preview should include a dedicated animation canvas');
+  assert.match(htmlSource, /id="aiConsent"/, 'sending notes to Gemini should require explicit consent');
+  assert.match(htmlSource, /id="animateButton"/, 'the preview should offer storyboard generation');
+  assert.match(htmlSource, /id="exportVideoButton"/, 'the preview should offer a video export control');
+  assert.match(htmlSource, /firebase-functions-compat\.js/, 'Firebase callable functions SDK should load before app.js');
+  assert.match(appSource, /canvas\.captureStream\(30\)/, 'video export should record animated canvas frames');
+}
+
+function testInternalSharedReviewQueueIsRoleGated() {
+  for (const id of ['workflowState', 'submitReviewButton', 'reviewControls', 'approveLessonButton', 'requestChangesButton']) {
+    assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should exist in the internal workflow UI`);
+  }
+  for (const id of ['topicBriefNotes', 'explanationNotes', 'formulaNotes', 'exampleNotes', 'trickNotes', 'solveNotes']) {
+    assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should provide a dedicated authoring step`);
+  }
+  assert.match(htmlSource, /HUMAN REVIEW GATE/, 'the independent approval route should remain visible in the authoring flow');
+  assert.match(htmlSource, /Independent reviewer/, 'approval must require a different reviewer');
+  assert.match(appSource, /httpsCallable\('createInternalLesson'\)/, 'new content should go through the server-side shared-draft callable');
+  assert.match(appSource, /httpsCallable\('transitionInternalLesson'\)/, 'review status changes should go through callable functions');
+  assert.match(htmlSource, /No customer-facing publish route is enabled/, 'internal approval must not expose lessons to customers');
+
+  const wizard = createHarness({ speech: false });
+  vm.runInContext("currentRole='author';sharedQueueReady=true", wizard.context);
+  assert.equal(read(wizard, 'goToAuthoringStep(1)'), false, 'the wizard should require a topic title before advancing');
+  wizard.getElement('topic').value = 'Price elasticity';
+  assert.equal(read(wizard, 'goToAuthoringStep(1)'), false, 'the first step should require a topic brief');
+  wizard.getElement('topicBriefNotes').value = 'A concise introduction to how price changes affect demand.';
+  assert.equal(read(wizard, 'goToAuthoringStep(1)'), true);
+  assert.equal(read(wizard, 'authoringStep'), 1);
+  assert.equal(wizard.getElement('authorStep1').hidden, true);
+  assert.equal(wizard.getElement('authorStep2').hidden, false);
+  assert.equal(read(wizard, 'goToAuthoringStep(3)'), false, 'the stepper should not let authors skip ahead');
+  for (let step = 2; step < 6; step += 1) assert.equal(read(wizard, `goToAuthoringStep(${step})`), true);
+  assert.equal(wizard.getElement('createLessonButton').hidden, false, 'the save/build action should appear at the final step');
+
+  const app = createHarness({ speech: false });
+  vm.runInContext("currentUser={uid:'author-1'};currentRole='author';currentScope='internal';currentId='lesson-1';lessons=[{id:'lesson-1',_scope:'internal',createdByUid:'author-1',status:'draft'}]", app.context);
+  assert.equal(read(app, 'canEditCurrentLesson()'), true, 'an author can edit their own draft');
+  assert.equal(read(app, 'canUseSharedQueue()'), false, 'shared authoring waits until the server role and Firestore queue are ready');
+  vm.runInContext('sharedQueueReady=true', app.context);
+  assert.equal(read(app, 'canUseSharedQueue()'), true, 'authors can create once the shared queue is available');
+  vm.runInContext("currentRole='reviewer'", app.context);
+  assert.equal(read(app, 'roleCanReview()'), true, 'reviewers receive review permission');
+  assert.equal(read(app, 'canEditCurrentLesson()'), false, 'reviewers cannot edit the author’s draft');
+  vm.runInContext("currentUser={uid:'author-1'};currentRole='owner'", app.context);
+  assert.equal(read(app, 'canEditCurrentLesson()'), true, 'owners can edit drafts');
+
+  vm.runInContext("currentRole=null;currentScope='internal';currentId=null;lessons=[];sharedQueueReady=false;workspaceError='functions/permission-denied';updateWorkflowControls()", app.context);
+  assert.match(app.getElement('workflowHint').textContent, /allowedUsers\/\{uid\}/, 'a callable permission-denied response should explain the required role allow-list entry');
+}
+
+function testSixSourceFieldsComposeSlidesAndMigrateLegacyNotes() {
+  const app = createHarness({ speech: false });
+  app.getElement('topicBriefNotes').value = 'A brief describes how price changes affect quantity demanded.';
+  app.getElement('explanationNotes').value = 'Explain the central idea clearly.';
+  app.getElement('formulaNotes').value = 'Elasticity = percentage change in quantity divided by percentage change in price.';
+  app.getElement('exampleNotes').value = 'If quantity falls by 10 percent after price rises by 5 percent, elasticity is 2.';
+  app.getElement('trickNotes').value = 'Remember the sign and interpret magnitude.';
+  app.getElement('solveNotes').value = 'Identify values, substitute, and check the result.';
+  let payload = read(app, 'lessonFormPayload()');
+  assert.match(payload.source, /TOPIC BRIEF:/);
+  assert.match(payload.source, /EXPLANATION:/);
+  assert.match(payload.source, /FORMULA:/);
+  assert.match(payload.source, /WORKED EXAMPLE:/);
+  assert.match(payload.source, /TRICK:/);
+  assert.match(payload.source, /STEPS:/);
+  const slides = read(app, `createSlides(${JSON.stringify({...payload, program:'B.Com'})})`);
+  assert.match(slides[0].body, /brief describes how price changes/, 'the topic brief should inform the opening slide');
+  assert.match(slides[1].body, /central idea/);
+  assert.match(slides[3].body, /Elasticity/);
+  assert.match(slides[4].body, /quantity falls/);
+  assert.match(slides[5].body, /Remember the sign/);
+  assert.match(slides[2].steps[0], /Identify values/);
+
+  const legacySource = 'TOPIC BRIEF:\nElasticity describes a demand response.\n\nEXPLANATION:\nDemand changes with price.\n\nFORMULA / KEY TERMS:\nElasticity = percentage change in quantity divided by percentage change in price.\n\nTRICK / SHORTCUT:\nCheck the sign first.\n\nSTEPS:\nIdentify the change.\nSubstitute the values.\n\nWORKED EXAMPLE:\nCompare the result with one.';
+  vm.runInContext(`populateSourceFields(${JSON.stringify(legacySource)})`, app.context);
+  assert.equal(app.getElement('topicBriefNotes').value, 'Elasticity describes a demand response.');
+  assert.equal(app.getElement('explanationNotes').value, 'Demand changes with price.');
+  assert.equal(app.getElement('formulaNotes').value, 'Elasticity = percentage change in quantity divided by percentage change in price.');
+  assert.equal(app.getElement('exampleNotes').value, 'Compare the result with one.');
+  assert.equal(app.getElement('trickNotes').value, 'Check the sign first.');
+  assert.equal(app.getElement('solveNotes').value, 'Identify the change.\n\nSubstitute the values.');
+  payload = read(app, 'lessonFormPayload()');
+  assert.match(payload.source, /WORKED EXAMPLE:\nCompare the result with one\./, 'legacy examples should migrate into the dedicated example step');
+}
+
+async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
+  const app = createHarness({ speech: false });
+  const updates = [];
+  app.context.mockDb = {
+    collection(name) {
+      assert.equal(name, 'users');
+      return { doc(uid) {
+        assert.equal(uid, 'author-1');
+        return { collection(subcollection) {
+          assert.equal(subcollection, 'lessons');
+          return { doc(id) {
+            return { update: async value => updates.push({ id, value }) };
+          } };
+        } };
+      } };
+    },
+  };
+  app.context.mockFirebase = { firestore: { FieldValue: { serverTimestamp: () => 'SERVER_TIMESTAMP' } } };
+  vm.runInContext("db=mockDb;firebase=mockFirebase;currentUser={uid:'author-1'};currentRole=null;currentScope='private';currentId='legacy-1';lessons=[{id:'legacy-1',_scope:'private',status:'private',slides:[]}];deck=[{kind:'intro',title:'Old title',body:'Old body',steps:[]}];", app.context);
+  app.getElement('program').value = 'B.Sc';
+  app.getElement('topic').value = 'Edited topic';
+  app.getElement('topicBriefNotes').value = 'A short brief about this edited lesson topic.';
+  app.getElement('explanationNotes').value = 'Updated explanation of the concept.';
+  app.getElement('formulaNotes').value = 'Use the elasticity formula carefully.';
+  app.getElement('exampleNotes').value = 'A worked calculation with the final answer.';
+  app.getElement('trickNotes').value = 'Remember the sign before calculating.';
+  app.getElement('solveNotes').value = 'Step 1: identify the values.\nStep 2: substitute and check.';
+  vm.runInContext("deck[0].body='Edited scene body';queueSave()", app.context);
+  app.advanceTime(1099);
+  assert.equal(updates.length, 0, 'the idle autosave should wait until typing pauses');
+  app.advanceTime(1);
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  assert.equal(updates.length, 1, 'a debounced edit should save once');
+  assert.equal(updates[0].id, 'legacy-1');
+  assert.equal(updates[0].value.program, 'B.Sc');
+  assert.equal(updates[0].value.topic, 'Edited topic');
+  assert.match(updates[0].value.source, /TOPIC BRIEF:\nA short brief about this edited lesson topic\./);
+  assert.match(updates[0].value.source, /EXPLANATION:\nUpdated explanation of the concept\./);
+  assert.match(updates[0].value.source, /FORMULA:\nUse the elasticity formula carefully\./);
+  assert.match(updates[0].value.source, /WORKED EXAMPLE:\nA worked calculation with the final answer\./);
+  assert.match(updates[0].value.source, /TRICK:\nRemember the sign before calculating\./);
+  assert.match(updates[0].value.source, /STEPS:\nStep 1: identify the values\.\nStep 2: substitute and check\./);
+  assert.equal(updates[0].value.slides[0].body, 'Edited scene body');
+  assert.equal('id' in updates[0].value, false, 'the legacy document id must not be written as lesson content');
+  assert.equal(read(app, 'editorDirty'), false, 'a successful save should clear the dirty flag');
+}
+
+async function testClosingAnUneditedReturnedDraftDoesNotResetItsWorkflowState() {
+  const app = createHarness({ speech: false });
+  const calls = [];
+  app.context.functionsClient = {
+    httpsCallable(name) {
+      return async payload => {
+        calls.push({ name, payload });
+        return { data: { status: 'draft' } };
+      };
+    },
+  };
+  vm.runInContext("currentUser={uid:'author-1'};currentRole='author';sharedQueueReady=true;currentScope='internal';currentId='returned-1';lessons=[{id:'returned-1',_scope:'internal',createdByUid:'author-1',status:'changes_requested',slides:[]}];deck=[];", app.context);
+  await vm.runInContext('closeBuilder()', app.context);
+  assert.equal(calls.length, 0, 'closing without edits should not issue an unnecessary save');
+  assert.equal(read(app, 'lessons[0].status'), 'changes_requested', 'the reviewer-requested state should remain until the author edits');
+}
+
+function testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration() {
+  const app = createHarness({ speech: false });
+  const baseDeck = [
+    { kind: 'intro', kicker: 'INTRO', title: 'Topic', body: 'Original notes.', steps: [] },
+    { kind: 'concept', kicker: 'IDEA', title: 'Concept', body: 'Original concept.', steps: [] },
+    { kind: 'steps', kicker: 'STEPS', title: 'Process', body: 'Original steps.', steps: ['Step one.'] },
+    { kind: 'formula', kicker: 'FORMULA', title: 'Formula', body: 'Original formula.', steps: [] },
+    { kind: 'example', kicker: 'EXAMPLE', title: 'Example', body: 'Original example.', steps: [] },
+    { kind: 'trick', kicker: 'MEMORY', title: 'Memory cue', body: 'Original cue.', steps: [] },
+    { kind: 'recap', kicker: 'RECAP', title: 'Recap', body: 'Original recap.', steps: [] },
+  ];
+  const kinds = ['intro', 'concept', 'steps', 'formula', 'example', 'trick', 'recap'];
+  const storyboard = {
+    reviewNote: 'Review every scene.',
+    scenes: kinds.slice().reverse().map(kind => ({
+      kind,
+      kicker: `${kind.toUpperCase()} · STORY`,
+      title: `${kind} made simple`,
+      explanation: `Plain language for ${kind}.`,
+      narration: `Here is the spoken explanation for ${kind}.`,
+      steps: kind === 'steps' ? ['Look at the first part.', 'Then connect the next part.'] : [],
+      visualLabels: ['First idea', 'Next step', 'Clear result'],
+      durationSeconds: 6,
+      reviewNote: 'Check this detail.',
+    })),
+  };
+  const merged = read(app, `mergeStoryboard(${JSON.stringify(baseDeck)}, ${JSON.stringify(storyboard)})`);
+  assert.equal(merged.length, 7, 'animation should preserve the fixed seven-scene lesson');
+  assert.deepEqual(Array.from(merged, scene => scene.kind), kinds, 'scenes should be normalized to the lesson order');
+  assert.equal(merged[2].body, 'Plain language for steps.');
+  assert.equal(merged[2].animation.visualType, 'flow');
+  assert.equal(merged[2].steps.length, 2);
+
+  setDeck(app, merged);
+  assert.equal(read(app, 'getSlideNarrationText(2)'), 'Here is the spoken explanation for steps.');
+  vm.runInContext('renderSlide(2)', app.context);
+  assert.match(app.getElement('stageContent').innerHTML, /Plain language for steps/);
+  assert.throws(() => read(app, `mergeStoryboard(${JSON.stringify(baseDeck)}, { scenes: [] })`), /complete seven-scene/);
+}
+
 async function main() {
   testContinuousNarrationAndTwoSecondDefault();
   testPauseResumeSpeechAndTransition();
@@ -362,6 +554,12 @@ async function main() {
   testOneOffVoiceIsCancelledByManualNavigation();
   await testClosingBuilderAndSigningOutCancelSpeech();
   testFallbackTimingAndPacingControl();
+  testAnimatedExplainerIsConsentGatedAndHasVideoExportControls();
+  testInternalSharedReviewQueueIsRoleGated();
+  testSixSourceFieldsComposeSlidesAndMigrateLegacyNotes();
+  await testPrivateDraftAutosavePersistsFormAndSceneEdits();
+  await testClosingAnUneditedReturnedDraftDoesNotResetItsWorkflowState();
+  testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration();
   console.log('Frontend playback tests passed.');
 }
 

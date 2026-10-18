@@ -8,6 +8,7 @@
       "README.md",
       "server.py",
       "test_server.py",
+      "functions/**",
       "data/**",
       "*.sqlite3",
       "*.sqlite3-shm",
@@ -26,6 +27,11 @@
         ]
       }
     ]
+  },
+  "functions": {
+    "source": "functions",
+    "codebase": "default",
+    "runtime": "nodejs22"
   },
   "firestore": {
     "rules": "firestore.rules"
