@@ -35,3 +35,6 @@ jobs:
 
       - name: Check frontend JavaScript syntax
         run: node --check app.js
+
+      - name: Test frontend playback behavior
+        run: node test_app.js
