@@ -21,7 +21,7 @@ The animated-explanation button needs the deployed Firebase callable function an
 - Email/Password sign-in is enabled. There is no public registration form; create approved accounts through Firebase Authentication.
 - Firestore database uses Production mode in `asia-south1`.
 - `firestore.rules` allows access only when the authenticated UID has an admin-created `/allowedUsers/{uid}` marker. Each approved account can access only `/users/{uid}/lessons/{lessonId}`.
-- Firebase Functions uses the `asia-south1` region and requires a signed-in Firebase user.
+- Firebase Functions uses the Node.js 22 runtime in `asia-south1` and requires a signed-in Firebase user.
 
 ### Approve a user
 
