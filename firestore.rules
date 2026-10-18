@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isApprovedOwner(uid) {
+      return request.auth != null
+        && request.auth.uid == uid
+        && exists(/databases/$(database)/documents/allowedUsers/$(uid));
+    }
+
+    // This allow-list can only be edited from the Firebase console/Admin SDK.
+    // The app client cannot read, create, update, or delete these documents.
+    match /allowedUsers/{uid} {
+      allow read, write: if false;
+    }
+
+    // A signed-in user can access only their own lesson documents, and only
+    // after an administrator adds their UID to /allowedUsers/{uid}.
+    match /users/{uid}/lessons/{lessonId} {
+      allow read, write: if isApprovedOwner(uid);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

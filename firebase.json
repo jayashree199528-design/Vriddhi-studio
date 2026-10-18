@@ -1,0 +1,33 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "firestore.rules",
+      "README.md",
+      "server.py",
+      "test_server.py",
+      "data/**",
+      "*.sqlite3",
+      "*.sqlite3-shm",
+      "*.sqlite3-wal",
+      "**/.*",
+      "**/node_modules/**",
+      "**/__pycache__/**",
+      ".github/**"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

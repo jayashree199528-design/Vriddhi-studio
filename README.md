@@ -1,58 +1,56 @@
 # Lesson Studio — private academic explainer builder
 
-A local-first, text-first tool for turning prepared college course notes into a consistent lesson slide deck. Intended for private internal testing before considering a public service.
+A private, text-first tool for turning prepared college course notes into a consistent animated slide deck. Current target: internal testing with one approved account before considering a public service.
 
 ## Run locally
 
-Requirements: Python 3.10+; no third-party Python packages required.
+Requirements: Python 3.10+ and internet access (the Firebase Web SDK loads from Google's CDN).
 
-```bash
-python3 server.py
+```powershell
+py server.py
 ```
 
-Open http://127.0.0.1:8000. By default the backend binds to localhost only. SQLite data is stored in `data/lessons.sqlite3` and survives browser restarts. To store it elsewhere, set `LESSON_STUDIO_DATA` to a directory path.
+Open http://127.0.0.1:8000. The app requires Firebase email/password sign-in. Lessons are stored in Cloud Firestore under the signed-in user's UID; the local `data/lessons.sqlite3` API is retained for local API tests but is no longer used by the Firebase-connected browser app.
 
-## Current functionality
+## Firebase setup in this project
 
-- Inputs: program, branch/specialization, subject, module, topic, and pasted notes.
-- Backend endpoint turns notes into a fixed seven-slide sequence: title, core idea, steps, formula/key terms, worked example, shortcut/memory cue, recap.
-- Optional note labels include `CONCEPT:`, `STEPS:`, `FORMULA:`, `WORKED EXAMPLE:`, and `TRICK:`.
-- Edit slide titles and text, navigate/auto-play animated slides, and use browser speech synthesis to read the current slide aloud.
-- Create and retrieve lessons through a same-origin JSON API; SQLite persists lessons and slide edits.
-- The backend does not require AI provider keys, call an external service, or send notes off this machine.
+- Firebase project ID: `vriddhi-studio`.
+- Firebase Web config: `firebase-config.js`. This is public client config; it is not a service-account credential. Firebase Auth and Firestore rules must secure the app.
+- Email/Password sign-in is enabled. The app has no public registration form; create approved accounts through Firebase Authentication.
+- Firestore database uses Production mode in `asia-south1`.
+- `firestore.rules` allows access only when the authenticated UID has an admin-created `/allowedUsers/{uid}` marker. Client access to `/allowedUsers` is denied. Each approved account can access only `/users/{uid}/lessons/{lessonId}`.
+- `firebase.json` configures Firebase Hosting and deploys the Firestore rules. `.firebaserc` selects `vriddhi-studio`.
 
-## Important limits
+### Approve the first user
 
-This is a private prototype, not a production-secure multi-user service. There is no login, authorization, remote backup, AI fact-checking, generated audio file, downloadable PowerPoint, or MP4 export. It uses CSS slide transitions and local browser text-to-speech. The parser organizes supplied text; it does not invent missing formulas/examples or validate academic correctness. Review every slide before teaching from it.
+1. In Firebase Console → Authentication → Users, create the internal user's email/password account.
+2. Copy that user's UID.
+3. In Firestore, create collection `allowedUsers`, document ID equal to that UID, and a small field such as `role: "owner"`.
+4. Deploy `firestore.rules` before using the app.
 
-Do not expose the server on a public network or use sensitive/student-identifiable content until authentication, authorization, encryption/backup, deletion, and deployment security are implemented. `server.py` defaults to localhost for this reason.
+Never commit a service-account JSON key. The Web SDK config is intended to be in the browser; a service-account private key is not. For GitHub deploys, use a narrowly scoped secret or preferably Workload Identity Federation.
 
-## API
+## Current features and limits
 
-- `GET /api/health` — health check.
-- `GET /api/lessons` — list saved lessons.
-- `POST /api/lessons` — validate lesson input, create the fixed slide sequence, and save to SQLite.
-- `PUT /api/lessons/{32-character-id}` — persist slide text edits.
-- `DELETE /api/lessons/{32-character-id}` — delete a lesson.
+- Program, branch/specialization, subject, module, topic, and pasted notes.
+- Fixed seven-slide sequence: title, core idea, steps, formula/key terms, worked example, shortcut/memory cue, and recap.
+- Optional source labels: `CONCEPT:`, `STEPS:`, `FORMULA:`, `WORKED EXAMPLE:`, `TRICK:`.
+- Edit slide text, animate/navigate through slides, and use browser speech synthesis to read a slide aloud.
+- Firebase Authentication email/password sign-in and per-user Firestore lesson storage.
+- The note organizer does not call an AI, verify academic facts, create voice files, or export MP4. Review formulas/examples before using the slides.
 
-## GitHub CI and pull requests
+## GitHub PR and CI
 
-A GitHub Actions workflow is included at `.github/workflows/ci.yml`. It runs the Python unit tests and syntax checks for Python and JavaScript on pushes to `main` and pull requests targeting `main`. A PR template is included at `.github/pull_request_template.md`.
+`.github/workflows/ci.yml` runs unit tests and Python/JavaScript syntax checks on pushes to `main` and pull requests targeting `main`. `.github/pull_request_template.md` is included. The `main` branch ruleset should require a pull request and the `CI / tests` check.
 
-Suggested workflow: create a feature branch, make a change, push it, open a pull request into `main`, wait for the `CI / tests` check, review, and merge. In GitHub repository Settings → Rules, protect `main` and require a pull request and the `CI / tests` status check. The check must run once before GitHub will offer it as a required check.
+## Firebase deployment
 
-## Firebase hosting plan and deployment blocker
+After testing local sign-in and Firestore access, install Firebase CLI and deploy from this folder:
 
-The frontend can be served by Firebase Hosting. This app also has a Python API, so Firebase Hosting alone will not run the API. A future Firebase setup should route `/api/**` from Hosting to a Cloud Run backend. Before deploying the backend, replace local SQLite with Firestore or Cloud SQL and add authentication/authorization. Cloud Run's writable container filesystem is ephemeral; data written there does not survive instance shutdowns.
+```powershell
+npm install -g firebase-tools
+firebase login
+firebase deploy --only hosting,firestore:rules --project vriddhi-studio
+```
 
-Do not add a Firebase deployment workflow yet: deploying the current unauthenticated, SQLite-backed API would risk exposing lessons and losing stored data. Firebase Hosting can create temporary PR preview channels after the backend routing and access controls are ready.
-
-Keep service-account JSON files out of Git. Store a narrowly scoped deploy identity as a GitHub Actions secret if using a key; Workload Identity Federation is preferable because it avoids a long-lived JSON key. Never paste the key into chat or application source.
-
-## Next steps after internal testing
-
-1. Confirm the seven slide roles and visual template fit your B.Com/B.Sc/BBA/BA and engineering lessons.
-2. Add test cases with real formulas, numbered procedures, and long worked examples; improve preservation and formatting.
-3. Add optional server-side narration generation behind a provider adapter; keep API keys in environment/secrets, never in browser code.
-4. Add captions, timing controls, and MP4 rendering with a background job only after slide pacing and voice quality are approved.
-5. Add sign-in and stronger data controls before inviting any external users.
+Hosting serves the static frontend. The current browser app talks directly to Firebase Auth and Firestore with user-scoped rules; it does not expose the Python SQLite API. Do not deploy or use real student records until your institution approves the data handling and retention approach.
