@@ -186,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/"):
             self.send_json(404, {"error": "API route not found"})
             return
-        assets = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js"}
+        assets = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js", "/firebase-config.js": "firebase-config.js"}
         if path not in assets:
             self.send_error(404)
             return
