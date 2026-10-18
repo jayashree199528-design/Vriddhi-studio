@@ -353,6 +353,55 @@ function testFallbackTimingAndPacingControl() {
   assert.equal(app.getElement('transitionPause').value, '4000');
 }
 
+function testAnimatedExplainerIsConsentGatedAndHasVideoExportControls() {
+  assert.match(htmlSource, /id="animationCanvas"/, 'the preview should include a dedicated animation canvas');
+  assert.match(htmlSource, /id="aiConsent"/, 'sending notes to Gemini should require explicit consent');
+  assert.match(htmlSource, /id="animateButton"/, 'the preview should offer storyboard generation');
+  assert.match(htmlSource, /id="exportVideoButton"/, 'the preview should offer a video export control');
+  assert.match(htmlSource, /firebase-functions-compat\.js/, 'Firebase callable functions SDK should load before app.js');
+  assert.match(appSource, /canvas\.captureStream\(30\)/, 'video export should record animated canvas frames');
+}
+
+function testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration() {
+  const app = createHarness({ speech: false });
+  const baseDeck = [
+    { kind: 'intro', kicker: 'INTRO', title: 'Topic', body: 'Original notes.', steps: [] },
+    { kind: 'concept', kicker: 'IDEA', title: 'Concept', body: 'Original concept.', steps: [] },
+    { kind: 'steps', kicker: 'STEPS', title: 'Process', body: 'Original steps.', steps: ['Step one.'] },
+    { kind: 'formula', kicker: 'FORMULA', title: 'Formula', body: 'Original formula.', steps: [] },
+    { kind: 'example', kicker: 'EXAMPLE', title: 'Example', body: 'Original example.', steps: [] },
+    { kind: 'trick', kicker: 'MEMORY', title: 'Memory cue', body: 'Original cue.', steps: [] },
+    { kind: 'recap', kicker: 'RECAP', title: 'Recap', body: 'Original recap.', steps: [] },
+  ];
+  const kinds = ['intro', 'concept', 'steps', 'formula', 'example', 'trick', 'recap'];
+  const storyboard = {
+    reviewNote: 'Review every scene.',
+    scenes: kinds.slice().reverse().map(kind => ({
+      kind,
+      kicker: `${kind.toUpperCase()} · STORY`,
+      title: `${kind} made simple`,
+      explanation: `Plain language for ${kind}.`,
+      narration: `Here is the spoken explanation for ${kind}.`,
+      steps: kind === 'steps' ? ['Look at the first part.', 'Then connect the next part.'] : [],
+      visualLabels: ['First idea', 'Next step', 'Clear result'],
+      durationSeconds: 6,
+      reviewNote: 'Check this detail.',
+    })),
+  };
+  const merged = read(app, `mergeStoryboard(${JSON.stringify(baseDeck)}, ${JSON.stringify(storyboard)})`);
+  assert.equal(merged.length, 7, 'animation should preserve the fixed seven-scene lesson');
+  assert.deepEqual(Array.from(merged, scene => scene.kind), kinds, 'scenes should be normalized to the lesson order');
+  assert.equal(merged[2].body, 'Plain language for steps.');
+  assert.equal(merged[2].animation.visualType, 'flow');
+  assert.equal(merged[2].steps.length, 2);
+
+  setDeck(app, merged);
+  assert.equal(read(app, 'getSlideNarrationText(2)'), 'Here is the spoken explanation for steps.');
+  vm.runInContext('renderSlide(2)', app.context);
+  assert.match(app.getElement('stageContent').innerHTML, /Plain language for steps/);
+  assert.throws(() => read(app, `mergeStoryboard(${JSON.stringify(baseDeck)}, { scenes: [] })`), /complete seven-scene/);
+}
+
 async function main() {
   testContinuousNarrationAndTwoSecondDefault();
   testPauseResumeSpeechAndTransition();
@@ -362,6 +411,8 @@ async function main() {
   testOneOffVoiceIsCancelledByManualNavigation();
   await testClosingBuilderAndSigningOutCancelSpeech();
   testFallbackTimingAndPacingControl();
+  testAnimatedExplainerIsConsentGatedAndHasVideoExportControls();
+  testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration();
   console.log('Frontend playback tests passed.');
 }
 

@@ -643,7 +643,9 @@
     .slide-stage::after { right: 18%; bottom: -154px; width: 280px; height: 280px; }
     .slide-stage.empty-stage { color: #2d4b39 !important; background: #e8eee5 !important; }
     .slide-stage.empty-stage::before, .slide-stage.empty-stage::after { opacity: .14; }
-    .stage-content { position: relative; z-index: 1; width: min(100%, 620px); min-height: 225px; padding: 10px 6px 18px; }
+    .animation-canvas { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .stage-content { position: relative; z-index: 1; width: 59%; min-height: 225px; padding: 10px 6px 18px; }
+    .slide-stage.empty-stage .stage-content { width: min(100%, 620px); }
     .slide-kicker { display: inline-flex; align-items: center; min-height: 25px; margin-bottom: 12px; padding: 4px 8px; color: currentColor; font-size: 8px; font-weight: 800; letter-spacing: 1.25px; text-transform: uppercase; background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 255, 255, .17); border-radius: 5px; }
     .empty-stage .slide-kicker { background: rgba(49, 91, 73, .08); border-color: rgba(49, 91, 73, .09); }
     .stage-content h2 { max-width: 520px; margin: 0 0 10px; font-family: var(--serif); font-size: clamp(26px, 2.8vw, 35px); font-weight: 500; letter-spacing: -.55px; line-height: 1.12; }
@@ -741,6 +743,23 @@
     .script-slide input, .script-slide textarea { width: 100%; padding: 9px 10px; color: var(--ink); font-size: 11px; background: #fff; border: 1px solid #dddcd2; border-radius: 8px; }
     .script-slide textarea { min-height: 78px; resize: vertical; line-height: 1.55; }
     .empty-script { padding: 13px; color: var(--muted); font-size: 10px; line-height: 1.55; background: #f7f6f0; border: 1px dashed #e2e0d7; border-radius: 10px; }
+    .animation-maker { display: grid; gap: 11px; margin: 13px 15px 0; padding: 14px; background: linear-gradient(135deg, #f1f3eb, #f7f4e9); border: 1px solid #e5e8dc; border-radius: 12px; }
+    .animation-maker-head { display: flex; align-items: flex-start; gap: 10px; }
+    .animation-spark { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; color: #fff9e8; background: var(--forest); border-radius: 11px 11px 11px 4px; }
+    .animation-spark svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+    .animation-maker-head strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 16px; font-weight: 500; }
+    .animation-maker-head p { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .ai-consent { display: flex; align-items: flex-start; gap: 8px; color: var(--muted); font-size: 9px; line-height: 1.55; cursor: pointer; }
+    .ai-consent input { flex: 0 0 16px; width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--forest); }
+    .animation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .animation-actions button { min-height: 41px; font-size: 10px; }
+    .animation-actions .primary { padding: 8px 12px; }
+    .animation-actions .secondary-action { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 11px; color: var(--ink-soft); font-weight: 700; background: #fffefa; border: 1px solid var(--line); border-radius: 9px; }
+    .animation-actions .secondary-action:hover { background: #f7f6f0; }
+    .animation-actions .secondary-action svg, .animation-actions .primary svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .animation-actions button:disabled { opacity: .55; }
+    .animation-status { color: #697565; font-size: 9px; line-height: 1.5; }
+    .animation-export-note { color: var(--muted-soft); font-size: 8px; line-height: 1.5; }
     .alert { margin: 13px 15px 0; padding: 12px 14px; color: #6e715f; font-size: 9px; line-height: 1.65; background: #f6f3e8; border: 1px solid #eee7d5; border-radius: 10px; }
     .alert b { color: #566449; }
     .render-note { max-width: 950px; margin: 19px auto 0; color: var(--muted-soft); font-size: 10px; line-height: 1.65; text-align: center; }
@@ -872,7 +891,8 @@
       .deck-top small { max-width: 58vw; font-size: 8px; }
       .deck-top .format-chip { min-height: 38px; padding: 6px 8px; font-size: 9px; }
       .slide-stage { min-height: 290px; margin: 0 10px; padding: 23px 20px; }
-      .stage-content { min-height: 220px; padding: 8px 4px 16px; }
+      .stage-content { width: 100%; min-height: 220px; padding: 8px 4px 16px; }
+      .animation-canvas { opacity: .58; }
       .stage-content h2 { max-width: 100%; font-size: 27px; }
       .stage-content p { font-size: 11px; }
       .stage-content .steps-list { font-size: 10px; }
@@ -883,7 +903,9 @@
       .player-controls .play { min-width: 114px; padding-right: 10px; padding-left: 10px; }
       .player-controls .slide-index { min-width: 65px; }
       .playback-settings { margin-right: 10px; margin-left: 10px; padding: 12px; }
-      .slide-strip, .script-list, .alert { margin-right: 10px; margin-left: 10px; }
+      .slide-strip, .script-list, .alert, .animation-maker { margin-right: 10px; margin-left: 10px; }
+      .animation-maker { padding: 12px; }
+      .animation-actions button { width: 100%; }
       .settings-grid { grid-template-columns: minmax(0, 1fr); }
       .setting-control select { min-height: 44px; }
     }
@@ -1083,7 +1105,7 @@
       <div class="builder-heading">
         <div class="kicker">LESSON BUILDER</div>
         <h1>Start with the notes you trust.</h1>
-        <p>Set the course context, then paste your prepared material. Lesson Studio organizes your notes into a repeatable teaching sequence—it does not invent lesson content.</p>
+        <p>Set the course context, then paste your prepared material. Start with a notes-only draft; if you choose Gemini animation, it can add plain-language context for you to review.</p>
       </div>
 
       <div class="steps" aria-label="Lesson creation steps">
@@ -1160,6 +1182,7 @@
             <button class="format-chip" type="button" onclick="toggleScript()" id="scriptToggle" aria-controls="scriptList">Edit script</button>
           </div>
           <div class="slide-stage empty-stage" id="stage" data-template="campus" aria-live="polite" aria-label="Current lesson slide">
+            <canvas class="animation-canvas" id="animationCanvas" aria-hidden="true"></canvas>
             <div class="stage-content" id="stageContent">
               <div class="slide-kicker">YOUR LESSON PREVIEW</div>
               <h2>One clear idea at a time.</h2>
@@ -1237,10 +1260,27 @@
             <button class="slide-mini" type="button" disabled>Memory cue</button>
             <button class="slide-mini" type="button" disabled>Recap</button>
           </div>
+          <section class="animation-maker" aria-labelledby="animationHeading">
+            <div class="animation-maker-head">
+              <span class="animation-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span>
+              <span><strong id="animationHeading">Animate the explanation</strong><p>Gemini can turn your notes into a plain-language story, then our own vector scenes bring each idea to life.</p></span>
+            </div>
+            <label class="ai-consent" for="aiConsent"><input id="aiConsent" type="checkbox"><span>I agree to send this lesson’s notes to Google Gemini to create simplified explanations and an animated storyboard.</span></label>
+            <div class="animation-actions">
+              <button class="primary" id="animateButton" type="button" onclick="generateAnimatedLesson()" disabled>
+                Create animated explanation <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>
+              </button>
+              <button class="secondary-action" id="exportVideoButton" type="button" onclick="downloadAnimatedVideo()" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>Export animated video
+              </button>
+            </div>
+            <small class="animation-status" id="animationStatus" aria-live="polite">First arrange and save your lesson notes. AI output should be reviewed before teaching.</small>
+            <small class="animation-export-note">Notes are sent to Gemini only when you consent and generate. WebM export includes animated visuals and captions; browser narration plays in the preview but is not embedded in the export yet.</small>
+          </section>
           <div class="script-list" id="scriptList">
             <div class="empty-script">Arrange your notes first. Then edit the slide headings and narration text here.</div>
           </div>
-          <div class="alert"><b>Review note:</b> Lesson Studio organizes your prepared notes. It does not call an AI, verify facts, create a voice file or export an MP4.</div>
+          <div class="alert"><b>Review note:</b> Gemini can add plain-language context and examples, but AI output may be wrong. Check every formula, example and course-specific claim before teaching. Animations are built from safe, pre-defined vector scenes—not generated code.</div>
         </section>
       </div>
       <p class="render-note">Lessons are stored in your signed-in Firebase account. Keep student-identifiable information out unless your institution has approved its use.</p>
@@ -1251,6 +1291,7 @@
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-functions-compat.js" defer></script>
   <script src="/firebase-config.js" defer></script>
   <script src="/app.js" defer></script>
 </body>

@@ -33,6 +33,15 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Install Firebase Functions dependencies
+        run: npm ci --prefix functions
+
+      - name: Check backend function syntax
+        run: npm --prefix functions run check
+
+      - name: Test backend function logic
+        run: npm --prefix functions test
+
       - name: Check frontend JavaScript syntax
         run: node --check app.js
 
