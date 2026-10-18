@@ -366,6 +366,9 @@ function testInternalSharedReviewQueueIsRoleGated() {
   for (const id of ['workflowState', 'submitReviewButton', 'reviewControls', 'approveLessonButton', 'requestChangesButton']) {
     assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should exist in the internal workflow UI`);
   }
+  for (const id of ['explanationNotes', 'formulaNotes', 'trickNotes', 'solveNotes']) {
+    assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should provide a separate source-note field`);
+  }
   assert.match(appSource, /httpsCallable\('createInternalLesson'\)/, 'new content should go through the server-side shared-draft callable');
   assert.match(appSource, /httpsCallable\('transitionInternalLesson'\)/, 'review status changes should go through callable functions');
   assert.match(htmlSource, /No customer-facing publish route is enabled/, 'internal approval must not expose lessons to customers');
@@ -381,6 +384,31 @@ function testInternalSharedReviewQueueIsRoleGated() {
   assert.equal(read(app, 'canEditCurrentLesson()'), false, 'reviewers cannot edit the author’s draft');
   vm.runInContext("currentUser={uid:'author-1'};currentRole='owner'", app.context);
   assert.equal(read(app, 'canEditCurrentLesson()'), true, 'owners can edit drafts');
+
+  vm.runInContext("currentRole=null;currentScope='internal';currentId=null;lessons=[];sharedQueueReady=false;workspaceError='functions/permission-denied';updateWorkflowControls()", app.context);
+  assert.match(app.getElement('workflowHint').textContent, /allowedUsers\/\{uid\}/, 'a callable permission-denied response should explain the required role allow-list entry');
+}
+
+function testFourSourceFieldsComposeAndLoadLegacyNotes() {
+  const app = createHarness({ speech: false });
+  app.getElement('explanationNotes').value = 'Explain the central idea.';
+  app.getElement('formulaNotes').value = 'Use the main relationship.';
+  app.getElement('trickNotes').value = 'Remember the sign.';
+  app.getElement('solveNotes').value = 'Identify values, substitute, and check.';
+  let payload = read(app, 'lessonFormPayload()');
+  assert.match(payload.source, /EXPLANATION:/);
+  assert.match(payload.source, /FORMULA:/);
+  assert.match(payload.source, /TRICK:/);
+  assert.match(payload.source, /STEPS:/);
+
+  const legacySource = 'EXPLANATION:\nDemand changes with price.\n\nFORMULA:\nElasticity = percentage change in quantity divided by percentage change in price.\n\nTRICK:\nCheck the sign first.\n\nSTEPS:\nIdentify the change.\nSubstitute the values.\n\nWORKED EXAMPLE:\nCompare the result with one.';
+  vm.runInContext(`populateSourceFields(${JSON.stringify(legacySource)})`, app.context);
+  assert.equal(app.getElement('explanationNotes').value, 'Demand changes with price.');
+  assert.equal(app.getElement('formulaNotes').value, 'Elasticity = percentage change in quantity divided by percentage change in price.');
+  assert.equal(app.getElement('trickNotes').value, 'Check the sign first.');
+  assert.equal(app.getElement('solveNotes').value, 'Identify the change.\n\nSubstitute the values.\n\nCompare the result with one.');
+  payload = read(app, 'lessonFormPayload()');
+  assert.match(payload.source, /Compare the result with one\./, 'legacy example content should be preserved in the solve field');
 }
 
 async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
@@ -404,7 +432,10 @@ async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
   vm.runInContext("db=mockDb;firebase=mockFirebase;currentUser={uid:'author-1'};currentRole=null;currentScope='private';currentId='legacy-1';lessons=[{id:'legacy-1',_scope:'private',status:'private',slides:[]}];deck=[{kind:'intro',title:'Old title',body:'Old body',steps:[]}];", app.context);
   app.getElement('program').value = 'B.Sc';
   app.getElement('topic').value = 'Edited topic';
-  app.getElement('notes').value = 'Updated prepared course notes with a worked example.';
+  app.getElement('explanationNotes').value = 'Updated explanation of the concept.';
+  app.getElement('formulaNotes').value = 'Use the elasticity formula carefully.';
+  app.getElement('trickNotes').value = 'Remember the sign before calculating.';
+  app.getElement('solveNotes').value = 'Step 1: identify the values.\nStep 2: substitute and check.';
   vm.runInContext("deck[0].body='Edited scene body';queueSave()", app.context);
   app.advanceTime(500);
   await new Promise(resolve => setTimeout(resolve, 0));
@@ -413,7 +444,10 @@ async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
   assert.equal(updates[0].id, 'legacy-1');
   assert.equal(updates[0].value.program, 'B.Sc');
   assert.equal(updates[0].value.topic, 'Edited topic');
-  assert.equal(updates[0].value.source, 'Updated prepared course notes with a worked example.');
+  assert.match(updates[0].value.source, /EXPLANATION:\nUpdated explanation of the concept\./);
+  assert.match(updates[0].value.source, /FORMULA:\nUse the elasticity formula carefully\./);
+  assert.match(updates[0].value.source, /TRICK:\nRemember the sign before calculating\./);
+  assert.match(updates[0].value.source, /STEPS:\nStep 1: identify the values\.\nStep 2: substitute and check\./);
   assert.equal(updates[0].value.slides[0].body, 'Edited scene body');
   assert.equal('id' in updates[0].value, false, 'the legacy document id must not be written as lesson content');
   assert.equal(read(app, 'editorDirty'), false, 'a successful save should clear the dirty flag');
@@ -487,6 +521,7 @@ async function main() {
   testFallbackTimingAndPacingControl();
   testAnimatedExplainerIsConsentGatedAndHasVideoExportControls();
   testInternalSharedReviewQueueIsRoleGated();
+  testFourSourceFieldsComposeAndLoadLegacyNotes();
   await testPrivateDraftAutosavePersistsFormAndSceneEdits();
   await testClosingAnUneditedReturnedDraftDoesNotResetItsWorkflowState();
   testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration();

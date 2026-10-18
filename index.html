@@ -607,6 +607,8 @@
     .field input:focus, .field select:focus, .field textarea:focus { border-color: #809d83; }
     .field select { padding-right: 30px; }
     .field textarea { min-height: 214px; resize: vertical; line-height: 1.65; }
+    .source-field-row .field textarea { min-height: 132px; }
+    .source-helper { margin: -2px 0 14px; }
     .helper { margin-top: 7px; color: var(--muted-soft); font-size: 10px; line-height: 1.55; }
     .template-lock {
       display: flex;
@@ -906,6 +908,7 @@
       .card-content { padding: 15px 14px 16px; }
       .field-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
       .field textarea { min-height: 190px; }
+      .source-field-row .field textarea { min-height: 150px; }
       .build-actions { align-items: stretch; flex-direction: column; }
       .build-actions > span { order: 1; }
       .build-actions .primary { width: 100%; order: 0; }
@@ -1179,11 +1182,27 @@
               <label for="topic">Lesson topic <span class="required-label">Required</span></label>
               <input id="topic" placeholder="e.g. Binary search trees" required oninput="queueSave()">
             </div>
-            <div class="field">
-              <label for="notes">Your prepared notes</label>
-              <textarea id="notes" placeholder="Paste the explanation, formulas, worked examples, tricks and shortcuts you prepared. Headings can help, for example:\n\nCONCEPT / EXPLANATION:\n…\n\nFORMULA / KEY TERMS:\n…\n\nWORKED EXAMPLE:\n…\n\nTRICK / SHORTCUT:\n…\n\nNormal notes work too; labeled sections are optional." oninput="queueSave()"></textarea>
-              <div class="helper">Tip: label formulas and worked examples so they’re easier to review on their matching slides.</div>
+            <div class="field-row source-field-row">
+              <div class="field">
+                <label for="explanationNotes">1. Explanation / concept</label>
+                <textarea id="explanationNotes" placeholder="Explain the idea, definition, or concept in your own words…" oninput="queueSave()"></textarea>
+              </div>
+              <div class="field">
+                <label for="formulaNotes">2. Formulas &amp; key terms</label>
+                <textarea id="formulaNotes" placeholder="Add formulas, symbols, definitions, and what each term means…" oninput="queueSave()"></textarea>
+              </div>
             </div>
+            <div class="field-row source-field-row">
+              <div class="field">
+                <label for="trickNotes">3. Tricks / memory cues</label>
+                <textarea id="trickNotes" placeholder="Add shortcuts, patterns, mnemonics, or common pitfalls…" oninput="queueSave()"></textarea>
+              </div>
+              <div class="field">
+                <label for="solveNotes">4. How to solve / steps</label>
+                <textarea id="solveNotes" placeholder="Write the method in order: what to identify, which formula to use, and how to check the answer…" oninput="queueSave()"></textarea>
+              </div>
+            </div>
+            <div class="helper source-helper">Fill in one or more sections. Older drafts are sorted into these fields when opened; the original note content is kept when saved.</div>
             <div class="template-lock">
               <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
               <span>The seven-slide lesson flow stays fixed. Choose a visual theme and transition in the preview; your notes remain the source of truth.</span>

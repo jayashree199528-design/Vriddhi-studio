@@ -28,6 +28,7 @@ function illustration(i){const paths=[`<rect x="27" y="22" width="132" height="7
 function roleCanAuthor(){return currentRole==='author'||currentRole==='owner'}
 function roleCanReview(){return currentRole==='reviewer'||currentRole==='owner'}
 function canUseSharedQueue(){return roleCanAuthor()&&sharedQueueReady}
+function isRoleAssignmentError(){return workspaceError==='functions/permission-denied'||workspaceError==='permission-denied'}
 function canEditCurrentLesson(){
   if(currentScope==='private')return Boolean(currentUser&&currentId);
   const lesson=lessons.find(item=>item.id===currentId&&item._scope==='internal');
@@ -45,8 +46,9 @@ function renderLessons(){
   const el=document.getElementById('modules');
   if(!lessons.length){
     const createButton=canUseSharedQueue()?'<button class="primary" type="button" onclick="openBuilder()">Create an internal draft <span aria-hidden="true">→</span></button>':'';
-    const emptyTitle=sharedQueueReady?'No shared lesson drafts yet.':'Internal workspace service is unavailable.';
-    const emptyCopy=sharedQueueReady?'Authors can create drafts for the team. Reviewers can inspect them before internal approval.':'The shared queue needs its callable functions and Firestore read rules deployed. Existing private drafts are still kept in your account.';
+    const roleError=isRoleAssignmentError();
+    const emptyTitle=sharedQueueReady?'No shared lesson drafts yet.':roleError?'Internal role assignment required.':'Internal workspace service is unavailable.';
+    const emptyCopy=sharedQueueReady?'Authors can create drafts for the team. Reviewers can inspect them before internal approval.':roleError?'Your account needs an author, reviewer, or owner role in allowedUsers before it can access the shared queue. Existing private drafts are still kept in your account.':'The shared queue needs its callable functions and Firestore read rules deployed. Existing private drafts are still kept in your account.';
     el.innerHTML=`<div class="empty"><div class="empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H20v16H7.5A2.5 2.5 0 0 0 5 21V5.5Z"/><path d="M5 17a2.5 2.5 0 0 1 2.5-2.5H20M9 7h7M9 10h6"/><path d="M12 13v5m-2.5-2.5h5"/></svg></div><div class="empty-copy"><span class="eyebrow">INTERNAL WORKSPACE</span><strong>${esc(emptyTitle)}</strong><p>${esc(emptyCopy)}</p></div>${createButton}</div>`;
     return;
   }
@@ -90,7 +92,8 @@ function updateWorkflowControls(){
   if(review)review.hidden=!mayReview;
   if(summary){const showSummary=Boolean(lesson?.reviewSummary);summary.hidden=!showSummary;summary.textContent=showSummary?`Reviewer note: ${lesson.reviewSummary}`:''}
   if(hint){
-    if(workspaceError&&!sharedQueueReady)hint.textContent='Shared internal services or Firestore read rules are unavailable. Existing private drafts remain accessible; deploy the callable functions and Firestore rules to enable the team queue.';
+    if(isRoleAssignmentError())hint.textContent='Your sign-in works, but this account has no internal role. Ask an owner to add allowedUsers/{uid} with role author, reviewer, or owner in the vriddhi-studio project, then sign in again.';
+    else if(workspaceError&&!sharedQueueReady)hint.textContent='Shared internal services or Firestore read rules are unavailable. Existing private drafts remain accessible; deploy the callable functions and Firestore rules to enable the team queue.';
     else if(newDraft)hint.textContent=canUseSharedQueue()?'New lessons are shared team drafts. Submit them for independent review when ready.':'Your role is read-only or the shared workspace is not ready; ask an owner to check your role and deployment.';
     else if(privateDraft)hint.textContent='This older draft is private to your account. Copy it into the shared queue when you want a teammate to review it.';
     else if(status==='draft')hint.textContent=canEdit?'Edit the draft, then submit it for an independent review.':'This author’s draft is visible to the team but only the author or an owner can edit it.';
@@ -101,7 +104,7 @@ function updateWorkflowControls(){
   }
   const reviewerNote=document.getElementById('internalReviewSummary');
   if(reviewerNote){reviewerNote.disabled=!mayReview;if(mayReview&&document.activeElement!==reviewerNote)reviewerNote.value=lesson.reviewSummary||'';}
-  for(const id of ['program','branch','subject','module','topic','notes']){
+  for(const id of ['program','branch','subject','module','topic','explanationNotes','formulaNotes','trickNotes','solveNotes']){
     const field=document.getElementById(id);if(field)field.disabled=!controlsEditable;
   }
   const buildButton=document.getElementById('buildLessonButton');
@@ -124,7 +127,7 @@ function syncScriptEditability(){
 function resetForm(){
 
   document.getElementById('program').value='B.Com';
-  for(const id of ['branch','subject','module','topic','notes'])document.getElementById(id).value='';
+  for(const id of ['branch','subject','module','topic','explanationNotes','formulaNotes','trickNotes','solveNotes'])document.getElementById(id).value='';
   document.getElementById('deckTitle').textContent='Lesson preview';
   document.getElementById('deckSub').textContent='Your seven-slide sequence appears here.';
   document.getElementById('slideIndex').textContent='No slides yet';
@@ -172,7 +175,7 @@ async function openLesson(id){
   document.getElementById('subject').value=lesson.subject||'';
   document.getElementById('module').value=lesson.module||'';
   document.getElementById('topic').value=lesson.topic||'';
-  document.getElementById('notes').value=lesson.source||'';
+  populateSourceFields(lesson.source||'');
   document.getElementById('deckTitle').textContent=lesson.topic||'Lesson preview';
   document.getElementById('deckSub').textContent=[lesson.program,lesson.branch,lesson.subject,lesson.module].filter(Boolean).join(' · ');
   document.getElementById('buildHint').textContent=currentScope==='internal'?'Shared internal draft · edits are role-controlled':'Private legacy draft · this copy stays in your account';
@@ -186,7 +189,14 @@ async function openLesson(id){
   document.body.style.overflow='hidden';
   renderDeck();updateWorkflowControls();
 }
-function splitSource(text){const sections={concept:[],formula:[],example:[],trick:[],steps:[],other:[]};const labels={concept:/^(concept|explanation|overview|definition|meaning)\s*:?\s*/i,formula:/^(formula|equation|key terms?|important terms?)\s*:?\s*/i,example:/^(worked example|example|application|problem)\s*:?\s*/i,trick:/^(trick|shortcut|memory trick|mnemonic|tips?)\s*:?\s*/i,steps:/^(steps?|process|procedure|how it works)\s*:?\s*/i};let active='other';for(let line of text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){for(const k in labels){if(labels[k].test(line)){active=k;line=line.replace(labels[k],'').trim();break}}if(line)sections[active].push(line)}return sections}
+function splitSource(text){const sections={concept:[],formula:[],example:[],trick:[],steps:[],other:[]};const labels={concept:/^(concept|explanations?|overview|definition|meaning)\s*:?\s*/i,formula:/^(formulas?|equations?|key terms?|important terms?)\s*:?\s*/i,example:/^(worked example|examples?|application|problem)\s*:?\s*/i,trick:/^(tricks?|shortcuts?|memory tricks?|mnemonics?|tips?)\s*:?\s*/i,steps:/^(steps?|process|procedure|how it works|how to solve)\s*:?\s*/i};let active='other';for(let line of String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){for(const k in labels){if(labels[k].test(line)){active=k;line=line.replace(labels[k],'').trim();break}}if(line)sections[active].push(line)}return sections}
+function populateSourceFields(source){
+  const sections=splitSource(source);
+  document.getElementById('explanationNotes').value=[...sections.concept,...sections.other].join('\n\n');
+  document.getElementById('formulaNotes').value=sections.formula.join('\n\n');
+  document.getElementById('trickNotes').value=sections.trick.join('\n\n');
+  document.getElementById('solveNotes').value=[...sections.steps,...sections.example].join('\n\n');
+}
 function getSentences(text){return (String(text||'').replace(/\s+/g,' ').match(/[^.!?]+[.!?]?/g)||[]).map(x=>x.trim()).filter(Boolean)}function summary(parts,n=3){return getSentences(parts.join(' ')).slice(0,n).join(' ').trim()}
 function createSlides(data){const s=splitSource(data.source),concept=summary(s.concept.length?s.concept:s.other.length?s.other:s.steps,3)||data.source.slice(0,420),sentences=getSentences(data.source),steps=(s.steps.length?s.steps:sentences.slice(1,5)).slice(0,4),formula=summary(s.formula,5)||'No formula or key terms were supplied in the source notes.',example=summary(s.example,5)||'No worked example was supplied in the source notes.',trick=summary(s.trick,4)||'No shortcut or memory cue was supplied in the source notes.',recap=summary([...s.concept,...s.formula,...s.trick,...s.other],2)||concept,course=data.program+(data.branch?' · '+data.branch:'');return [{kind:'intro',kicker:course,title:data.topic,body:[data.subject,data.module].filter(Boolean).join('  ·  ')||'A focused concept lesson',steps:[]},{kind:'concept',kicker:'THE CORE IDEA',title:'Start with the main idea',body:concept,steps:[]},{kind:'steps',kicker:'BREAK IT DOWN',title:'How it works',body:'Follow the explanation one step at a time.',steps},{kind:'formula',kicker:'FORMULA & KEY TERMS',title:'Keep this close',body:formula,steps:[]},{kind:'example',kicker:'APPLY THE IDEA',title:'A worked example',body:example,steps:[]},{kind:'trick',kicker:'REMEMBER IT',title:'Shortcut or memory cue',body:trick,steps:[]},{kind:'recap',kicker:'QUICK RECAP',title:'What to remember',body:recap,steps:[]}]}
 async function generateDeck(){
@@ -195,7 +205,7 @@ async function generateDeck(){
   if(!canUseSharedQueue()){toast('The shared internal queue is unavailable or your role cannot author drafts.');return}
   if(!functionsClient){toast('The internal lesson service is not deployed yet.');return}
   if(!payload.topic){toast('Add a topic title first.');document.getElementById('topic').focus();return}
-  if(payload.source.length<20){toast('Paste your prepared notes (at least a few sentences).');document.getElementById('notes').focus();return}
+  if(payload.source.length<20){toast('Paste your prepared notes (at least a few sentences).');document.getElementById('explanationNotes').focus();return}
   stopPlay();stopSceneAnimation();
   const btn=document.querySelector('.build-actions .primary');btn.disabled=true;btn.innerHTML='Arranging slides…';
   try{
@@ -433,7 +443,14 @@ function drawVideoFrame(ctx,width,height,scene,index,time,palette){
   ctx.save();ctx.globalAlpha=.4;ctx.strokeStyle=palette.fg;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(82,height-56);ctx.lineTo(width-82,height-56);ctx.stroke();ctx.restore();
 }
 function lessonFormPayload(){
-  return {program:document.getElementById('program').value,branch:document.getElementById('branch').value.trim(),subject:document.getElementById('subject').value.trim(),module:document.getElementById('module').value.trim(),topic:document.getElementById('topic').value.trim(),source:document.getElementById('notes').value.trim()};
+  const sourceSections=[
+    ['EXPLANATION',document.getElementById('explanationNotes').value.trim()],
+    ['FORMULA',document.getElementById('formulaNotes').value.trim()],
+    ['TRICK',document.getElementById('trickNotes').value.trim()],
+    ['STEPS',document.getElementById('solveNotes').value.trim()],
+  ];
+  const source=sourceSections.filter(([,value])=>value).map(([label,value])=>`${label}:\n${value}`).join('\n\n');
+  return {program:document.getElementById('program').value,branch:document.getElementById('branch').value.trim(),subject:document.getElementById('subject').value.trim(),module:document.getElementById('module').value.trim(),topic:document.getElementById('topic').value.trim(),source};
 }
 function setAnimationStatus(message){const status=document.getElementById('animationStatus');if(status)status.textContent=message}
 async function generateAnimatedLesson(){
@@ -444,7 +461,7 @@ async function generateAnimatedLesson(){
   if(!roleCanAuthor()||!canEditCurrentLesson()||workflowActionActive){toast('Only the draft author or an owner can generate this explanation.');return}
   if(animationRequestActive){toast('An animated explanation is already being generated.');return}
   const payload=lessonFormPayload(),button=document.getElementById('animateButton');
-  if(payload.source.length<20){toast('Add a few sentences of prepared notes first.');document.getElementById('notes').focus();return}
+  if(payload.source.length<20){toast('Add a few sentences of prepared notes first.');document.getElementById('explanationNotes').focus();return}
   const targetId=currentId,targetScope=currentScope,targetUid=currentUser.uid,baseDeck=JSON.parse(JSON.stringify(deck));
   animationRequestActive=true;updateWorkflowControls();button.disabled=true;button.textContent='Building your animated explanation…';
   setAnimationStatus('Gemini is shaping your notes into a simple story and scene plan. This can take a little while.');
@@ -642,7 +659,7 @@ async function showApp(user){
       workspaceError='';
     }catch(error){workspaceError=error.code||'workspace/unavailable';console.error('Internal workspace lookup failed:',workspaceError)}
   }else workspaceError='functions/unavailable';
-  if(roleLabel)roleLabel.textContent=currentRole==='owner'?'Owner · author + reviewer':currentRole==='reviewer'?'Internal reviewer':currentRole==='author'?'Internal author':'Workspace service unavailable';
+  if(roleLabel)roleLabel.textContent=currentRole==='owner'?'Owner · author + reviewer':currentRole==='reviewer'?'Internal reviewer':currentRole==='author'?'Internal author':isRoleAssignmentError()?'Role assignment required':'Workspace service unavailable';
   await refreshLessons();updateWorkflowControls();
 }
 function showLogin(){

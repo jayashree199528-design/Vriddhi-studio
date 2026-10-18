@@ -68,9 +68,10 @@ The callables use Firebase's callable CORS handling by default. A Hosting-only d
 
 ## Existing lesson and playback behavior
 
-- Program, branch/specialization, subject, module, topic, and pasted notes.
+- Program, branch/specialization, subject, module, topic, and four categorized source-note fields.
 - Fixed seven-scene teaching sequence; the AI storyboard enriches those scenes rather than changing their order.
-- Optional source labels: `CONCEPT:`, `STEPS:`, `FORMULA:`, `WORKED EXAMPLE:`, `TRICK:`.
+- Four separate source-note fields for explanation/concept, formulas/key terms, tricks/memory cues, and how-to-solve steps. Existing private drafts are sorted into these fields when opened and are saved back as labeled source text.
+- Optional source labels remain supported: `CONCEPT:`, `EXPLANATION:`, `STEPS:`, `FORMULA:`, `WORKED EXAMPLE:`, and `TRICK:`.
 - Continuous browser speech; each scene advances after narration ends, plus a configurable 0/2/4/6-second pause (2 seconds by default). If speech is unavailable, timing is estimated from narration length.
 - Pause, resume, stop, manual next/previous, single-scene narration, and speech cleanup when closing or signing out.
 - Auto/Female/Male browser voice preference where a matching English voice is available.
