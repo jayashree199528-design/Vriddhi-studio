@@ -7,16 +7,29 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/allowedUsers/$(uid));
     }
 
+    function isInternalMember() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/allowedUsers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/allowedUsers/$(request.auth.uid)).data.role in ['author', 'reviewer', 'owner'];
+    }
+
     // This allow-list can only be edited from the Firebase console/Admin SDK.
     // The app client cannot read, create, update, or delete these documents.
     match /allowedUsers/{uid} {
       allow read, write: if false;
     }
 
-    // A signed-in user can access only their own lesson documents, and only
-    // after an administrator adds their UID to /allowedUsers/{uid}.
+    // Backwards-compatible private drafts from the original prototype.
     match /users/{uid}/lessons/{lessonId} {
       allow read, write: if isApprovedOwner(uid);
+    }
+
+    // Shared internal drafts are visible only to explicitly assigned staff.
+    // All creation, editing, review and approval writes go through callable functions.
+    // Approved items are still internal in this prototype; there is no B2C read path.
+    match /internalLessons/{lessonId} {
+      allow read: if isInternalMember();
+      allow write: if false;
     }
 
     match /{document=**} {

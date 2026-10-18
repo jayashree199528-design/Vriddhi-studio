@@ -362,6 +362,80 @@ function testAnimatedExplainerIsConsentGatedAndHasVideoExportControls() {
   assert.match(appSource, /canvas\.captureStream\(30\)/, 'video export should record animated canvas frames');
 }
 
+function testInternalSharedReviewQueueIsRoleGated() {
+  for (const id of ['workflowState', 'submitReviewButton', 'reviewControls', 'approveLessonButton', 'requestChangesButton']) {
+    assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should exist in the internal workflow UI`);
+  }
+  assert.match(appSource, /httpsCallable\('createInternalLesson'\)/, 'new content should go through the server-side shared-draft callable');
+  assert.match(appSource, /httpsCallable\('transitionInternalLesson'\)/, 'review status changes should go through callable functions');
+  assert.match(htmlSource, /No customer-facing publish route is enabled/, 'internal approval must not expose lessons to customers');
+
+  const app = createHarness({ speech: false });
+  vm.runInContext("currentUser={uid:'author-1'};currentRole='author';currentScope='internal';currentId='lesson-1';lessons=[{id:'lesson-1',_scope:'internal',createdByUid:'author-1',status:'draft'}]", app.context);
+  assert.equal(read(app, 'canEditCurrentLesson()'), true, 'an author can edit their own draft');
+  assert.equal(read(app, 'canUseSharedQueue()'), false, 'shared authoring waits until the server role and Firestore queue are ready');
+  vm.runInContext('sharedQueueReady=true', app.context);
+  assert.equal(read(app, 'canUseSharedQueue()'), true, 'authors can create once the shared queue is available');
+  vm.runInContext("currentRole='reviewer'", app.context);
+  assert.equal(read(app, 'roleCanReview()'), true, 'reviewers receive review permission');
+  assert.equal(read(app, 'canEditCurrentLesson()'), false, 'reviewers cannot edit the author’s draft');
+  vm.runInContext("currentUser={uid:'author-1'};currentRole='owner'", app.context);
+  assert.equal(read(app, 'canEditCurrentLesson()'), true, 'owners can edit drafts');
+}
+
+async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
+  const app = createHarness({ speech: false });
+  const updates = [];
+  app.context.mockDb = {
+    collection(name) {
+      assert.equal(name, 'users');
+      return { doc(uid) {
+        assert.equal(uid, 'author-1');
+        return { collection(subcollection) {
+          assert.equal(subcollection, 'lessons');
+          return { doc(id) {
+            return { update: async value => updates.push({ id, value }) };
+          } };
+        } };
+      } };
+    },
+  };
+  app.context.mockFirebase = { firestore: { FieldValue: { serverTimestamp: () => 'SERVER_TIMESTAMP' } } };
+  vm.runInContext("db=mockDb;firebase=mockFirebase;currentUser={uid:'author-1'};currentRole=null;currentScope='private';currentId='legacy-1';lessons=[{id:'legacy-1',_scope:'private',status:'private',slides:[]}];deck=[{kind:'intro',title:'Old title',body:'Old body',steps:[]}];", app.context);
+  app.getElement('program').value = 'B.Sc';
+  app.getElement('topic').value = 'Edited topic';
+  app.getElement('notes').value = 'Updated prepared course notes with a worked example.';
+  vm.runInContext("deck[0].body='Edited scene body';queueSave()", app.context);
+  app.advanceTime(500);
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  assert.equal(updates.length, 1, 'a debounced edit should save once');
+  assert.equal(updates[0].id, 'legacy-1');
+  assert.equal(updates[0].value.program, 'B.Sc');
+  assert.equal(updates[0].value.topic, 'Edited topic');
+  assert.equal(updates[0].value.source, 'Updated prepared course notes with a worked example.');
+  assert.equal(updates[0].value.slides[0].body, 'Edited scene body');
+  assert.equal('id' in updates[0].value, false, 'the legacy document id must not be written as lesson content');
+  assert.equal(read(app, 'editorDirty'), false, 'a successful save should clear the dirty flag');
+}
+
+async function testClosingAnUneditedReturnedDraftDoesNotResetItsWorkflowState() {
+  const app = createHarness({ speech: false });
+  const calls = [];
+  app.context.functionsClient = {
+    httpsCallable(name) {
+      return async payload => {
+        calls.push({ name, payload });
+        return { data: { status: 'draft' } };
+      };
+    },
+  };
+  vm.runInContext("currentUser={uid:'author-1'};currentRole='author';sharedQueueReady=true;currentScope='internal';currentId='returned-1';lessons=[{id:'returned-1',_scope:'internal',createdByUid:'author-1',status:'changes_requested',slides:[]}];deck=[];", app.context);
+  await vm.runInContext('closeBuilder()', app.context);
+  assert.equal(calls.length, 0, 'closing without edits should not issue an unnecessary save');
+  assert.equal(read(app, 'lessons[0].status'), 'changes_requested', 'the reviewer-requested state should remain until the author edits');
+}
+
 function testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration() {
   const app = createHarness({ speech: false });
   const baseDeck = [
@@ -412,6 +486,9 @@ async function main() {
   await testClosingBuilderAndSigningOutCancelSpeech();
   testFallbackTimingAndPacingControl();
   testAnimatedExplainerIsConsentGatedAndHasVideoExportControls();
+  testInternalSharedReviewQueueIsRoleGated();
+  await testPrivateDraftAutosavePersistsFormAndSceneEdits();
+  await testClosingAnUneditedReturnedDraftDoesNotResetItsWorkflowState();
   testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration();
   console.log('Frontend playback tests passed.');
 }

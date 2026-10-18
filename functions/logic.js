@@ -43,6 +43,110 @@ async function isApprovedUser(db, uid) {
   return Boolean(marker && marker.exists);
 }
 
+const INTERNAL_ROLES = ['author', 'reviewer', 'owner'];
+const VISUAL_TYPES = {
+  intro: 'title',
+  concept: 'concept-map',
+  steps: 'flow',
+  formula: 'equation',
+  example: 'example',
+  trick: 'memory',
+  recap: 'recap',
+};
+
+function normalizeInternalRole(value) {
+  return INTERNAL_ROLES.includes(value) ? value : null;
+}
+
+async function getInternalRole(db, uid) {
+  if (!uid || !db || typeof db.collection !== 'function') return null;
+  const marker = await db.collection('allowedUsers').doc(uid).get();
+  return marker && marker.exists ? normalizeInternalRole(marker.data()?.role) : null;
+}
+
+function canAuthor(role) {
+  return role === 'author' || role === 'owner';
+}
+
+function canReview(role) {
+  return role === 'reviewer' || role === 'owner';
+}
+
+function validateSlides(value) {
+  if (!Array.isArray(value) || value.length !== SCENE_ORDER.length) {
+    throw new Error('An internal lesson must contain exactly seven scenes.');
+  }
+  const byKind = new Map();
+  for (const scene of value) {
+    if (!scene || !SCENE_ORDER.includes(scene.kind) || byKind.has(scene.kind)) {
+      throw new Error('The internal lesson contains an invalid scene sequence.');
+    }
+    byKind.set(scene.kind, scene);
+  }
+  if (SCENE_ORDER.some(kind => !byKind.has(kind))) {
+    throw new Error('The internal lesson is missing a required scene.');
+  }
+
+  return SCENE_ORDER.map(kind => {
+    const scene = byKind.get(kind);
+    const animation = scene.animation && typeof scene.animation === 'object' ? scene.animation : {};
+    const steps = Array.isArray(scene.steps)
+      ? scene.steps.filter(item => typeof item === 'string' && item.trim()).slice(0, 5).map(item => text(item, 180))
+      : [];
+    const visualLabels = Array.isArray(animation.visualLabels)
+      ? animation.visualLabels.filter(item => typeof item === 'string' && item.trim()).slice(0, 4).map(item => text(item, 54))
+      : [];
+    const result = {
+      kind,
+      kicker: text(scene.kicker, 64, SCENE_DEFAULTS[kind].kicker),
+      title: text(scene.title, 110, 'Untitled scene'),
+      body: text(scene.body, 850),
+      narration: text(scene.narration, 1_200),
+      steps,
+    };
+    if (animation.visualType === VISUAL_TYPES[kind]) {
+      result.animation = {
+        visualType: VISUAL_TYPES[kind],
+        visualLabels,
+        durationSeconds: Number.isFinite(Number(animation.durationSeconds))
+          ? Math.max(4, Math.min(9, Math.round(Number(animation.durationSeconds))))
+          : 6,
+        reviewNote: text(animation.reviewNote, 240),
+        overallReviewNote: text(animation.overallReviewNote, 400),
+      };
+    }
+    return result;
+  });
+}
+
+function validateInternalLesson(value) {
+  const input = validateInput(value);
+  return {
+    ...input,
+    slides: validateSlides(value.slides),
+    ...(value.animationProvider === 'gemini' ? { animationProvider: 'gemini' } : {}),
+    ...(value.animatedStoryboardVersion === 1 ? { animatedStoryboardVersion: 1 } : {}),
+  };
+}
+
+function transitionInternalStatus(status, action, role, actorUid, authorUid) {
+  if (action === 'submit_for_review') {
+    if (!canAuthor(role)) throw new Error('Only an internal author can submit a draft for review.');
+    if (actorUid !== authorUid && role !== 'owner') throw new Error('You can only submit your own draft for review.');
+    if (status !== 'draft' && status !== 'changes_requested') throw new Error('Only drafts can be submitted for review.');
+    return 'in_review';
+  }
+
+  if (action === 'approve' || action === 'request_changes') {
+    if (!canReview(role)) throw new Error('Only an internal reviewer can review this draft.');
+    if (actorUid === authorUid) throw new Error('A different internal reviewer must review the author’s draft.');
+    if (status !== 'in_review') throw new Error('Only drafts in review can receive a review decision.');
+    return action === 'approve' ? 'approved' : 'changes_requested';
+  }
+
+  throw new Error('Choose a valid internal review action.');
+}
+
 function parseJsonObject(value) {
   if (typeof value !== 'string' || !value.trim()) throw new Error('The explanation provider returned an empty response.');
   const cleaned = value.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
@@ -120,10 +224,18 @@ function buildUserPrompt(input) {
 }
 
 module.exports = {
+  INTERNAL_ROLES,
   SCENE_ORDER,
   buildUserPrompt,
+  canAuthor,
+  canReview,
+  getInternalRole,
   isApprovedUser,
+  normalizeInternalRole,
   normalizeStoryboard,
   parseJsonObject,
+  transitionInternalStatus,
   validateInput,
+  validateInternalLesson,
+  validateSlides,
 };

@@ -2,10 +2,15 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
   SCENE_ORDER,
+  canAuthor,
+  canReview,
+  getInternalRole,
   isApprovedUser,
   normalizeStoryboard,
   parseJsonObject,
+  transitionInternalStatus,
   validateInput,
+  validateInternalLesson,
 } = require('./logic');
 const { createAnimatedStoryboard } = require('./providers/gemini');
 const callableExports = require('./index');
@@ -41,8 +46,28 @@ function makeStoryboard() {
   };
 }
 
-test('loads the Firebase callable without needing provider credentials', () => {
-  assert.equal(typeof callableExports.generateAnimatedLesson, 'function');
+function makeSavedSlides() {
+  const visualTypes = ['title', 'concept-map', 'flow', 'equation', 'example', 'memory', 'recap'];
+  return SCENE_ORDER.map((kind, index) => ({
+    kind,
+    kicker: `${kind.toUpperCase()} IDEA`,
+    title: `A clear ${kind} idea`,
+    body: `A concise explanation of ${kind}.`,
+    narration: `Let’s explain ${kind} clearly.`,
+    steps: kind === 'steps' ? ['Notice the first part', 'Connect the next part'] : [],
+    animation: { visualType: visualTypes[index], visualLabels: ['Force', 'Mass', 'Result'], durationSeconds: 6 },
+  }));
+}
+
+test('loads the Firebase callables without needing provider credentials', () => {
+  for (const name of [
+    'getInternalWorkspace',
+    'createInternalLesson',
+    'saveInternalLesson',
+    'transitionInternalLesson',
+    'generateAnimatedLesson',
+  ]) assert.equal(typeof callableExports[name], 'function', `${name} should be exported`);
+  assert.deepEqual(callableExports.generateAnimatedLesson.__endpoint.secretEnvironmentVariables, [{ key: 'GEMINI_API_KEY' }], 'Gemini secret must be explicitly bound to its callable');
 });
 
 test('validates bounded lesson input and rejects oversized source notes', () => {
@@ -62,6 +87,52 @@ test('checks the private Firebase allow-list before using the paid provider', as
   assert.equal(await isApprovedUser(db, 'approved-user'), true);
   assert.equal(await isApprovedUser(db, 'unapproved-user'), false);
   assert.equal(await isApprovedUser(db, null), false);
+});
+
+test('reads explicit internal author and reviewer roles from the private allow-list', async () => {
+  const db = {
+    collection(name) {
+      assert.equal(name, 'allowedUsers');
+      return { doc: uid => ({
+        get: async () => ({
+          exists: uid !== 'missing-user',
+          data: () => ({ role: uid === 'writer' ? 'author' : uid === 'reviewer' ? 'reviewer' : uid === 'bad-role' ? 'student' : 'owner' }),
+        }),
+      }) };
+    },
+  };
+  assert.equal(await getInternalRole(db, 'writer'), 'author');
+  assert.equal(await getInternalRole(db, 'reviewer'), 'reviewer');
+  assert.equal(await getInternalRole(db, 'owner'), 'owner');
+  assert.equal(await getInternalRole(db, 'missing-user'), null);
+  assert.equal(await getInternalRole(db, 'bad-role'), null);
+  assert.equal(canAuthor('author'), true);
+  assert.equal(canAuthor('reviewer'), false);
+  assert.equal(canReview('reviewer'), true);
+  assert.equal(canReview('author'), false);
+});
+
+test('enforces the shared draft to review to approval workflow', () => {
+  assert.equal(transitionInternalStatus('draft', 'submit_for_review', 'author', 'author-1', 'author-1'), 'in_review');
+  assert.equal(transitionInternalStatus('changes_requested', 'submit_for_review', 'author', 'author-1', 'author-1'), 'in_review');
+  assert.equal(transitionInternalStatus('in_review', 'approve', 'reviewer', 'reviewer-1', 'author-1'), 'approved');
+  assert.equal(transitionInternalStatus('in_review', 'request_changes', 'reviewer', 'reviewer-1', 'author-1'), 'changes_requested');
+  assert.throws(() => transitionInternalStatus('draft', 'approve', 'reviewer', 'reviewer-1', 'author-1'), /Only drafts in review/);
+  assert.throws(() => transitionInternalStatus('in_review', 'approve', 'author', 'reviewer-1', 'author-1'), /Only an internal reviewer/);
+  assert.throws(() => transitionInternalStatus('in_review', 'approve', 'reviewer', 'author-1', 'author-1'), /different internal reviewer/);
+});
+
+test('validates shared internal lesson content and rejects unsafe scene sequences', () => {
+  const validated = validateInternalLesson({ ...validInput, slides: makeSavedSlides(), animationProvider: 'gemini' });
+  assert.equal(validated.slides.length, 7);
+  assert.deepEqual(validated.slides.map(slide => slide.kind), SCENE_ORDER);
+  assert.equal(validated.slides[3].animation.visualType, 'equation');
+  assert.equal(validated.animationProvider, 'gemini');
+
+  const duplicate = makeSavedSlides();
+  duplicate[0] = { ...duplicate[0], kind: 'concept' };
+  assert.throws(() => validateInternalLesson({ ...validInput, slides: duplicate }), /invalid scene sequence/);
+  assert.throws(() => validateInternalLesson({ ...validInput, slides: [] }), /exactly seven scenes/);
 });
 
 test('normalizes exactly seven scenes into the fixed teaching order', () => {

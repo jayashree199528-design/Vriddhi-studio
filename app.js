@@ -11,7 +11,7 @@ function readStoredPreference(key, allowedValues, fallback) {
 function savePreference(key, value) {
   try { window.localStorage.setItem(key, String(value)); } catch (_) {}
 }
-let lessons=[],deck=[],slide=0,playbackState='stopped',playTimer=null,playTimerPending=false,playTimerDeadline=0,playTimerRemaining=0,playTimerKind=null,playbackToken=0,activeUtterance=null,currentId=null,saveTimer=null,currentUser=null,db=null,auth=null,functionsClient=null,sceneAnimationFrame=null,sceneAnimationToken=0,sceneAnimationStartedAt=0,sceneAnimationElapsed=0,sceneAnimationPaused=false;
+let lessons=[],deck=[],slide=0,playbackState='stopped',playTimer=null,playTimerPending=false,playTimerDeadline=0,playTimerRemaining=0,playTimerKind=null,playbackToken=0,activeUtterance=null,currentId=null,currentScope='shared',currentRole=null,sharedQueueReady=false,workspaceError='',saveTimer=null,editorRevision=0,editorDirty=false,activeSave=null,currentUser=null,db=null,auth=null,functionsClient=null,sceneAnimationFrame=null,sceneAnimationToken=0,sceneAnimationStartedAt=0,sceneAnimationElapsed=0,sceneAnimationPaused=false,animationRequestActive=false,workflowActionActive=false;
 let transitionPauseMs=Number(readStoredPreference('vriddhi-playback-pause',['0','2000','4000','6000'],'2000'));
 let currentTemplate=readStoredPreference('vriddhi-template',['campus','notebook','midnight'],'campus');
 let voicePreference=readStoredPreference('vriddhi-voice',['auto','female','male'],'auto');
@@ -25,22 +25,104 @@ const templatePalettes={
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(s){const x=document.getElementById('toast');x.textContent=s;x.classList.add('show');clearTimeout(window.toastT);window.toastT=setTimeout(()=>x.classList.remove('show'),2600)}function showToast(s){toast(s)}
 function illustration(i){const paths=[`<rect x="27" y="22" width="132" height="78" rx="7" fill="#f9fcf8" stroke="#8db6a4"/><path d="M40 39h62M40 49h91M40 59h47" stroke="#8db6a4" stroke-width="3" stroke-linecap="round"/><circle cx="123" cy="72" r="16" fill="#d9eee2" stroke="#598b76" stroke-width="2"/><path d="M117 72h12m-6-6v12" stroke="#598b76" stroke-width="2"/><path d="M159 45h34M159 57h24M159 69h29" stroke="#6a9a86" stroke-width="2" stroke-linecap="round"/>`,`<path d="M36 88h154M47 88V51h38v37M107 88V33h45v55" stroke="#718cac" stroke-width="2.5"/><path d="M55 64h21M116 46h27M116 57h27" stroke="#9bb5d0" stroke-width="2"/><circle cx="171" cy="35" r="12" fill="#fff6cf" stroke="#d0ad54" stroke-width="2"/>`,`<path d="M40 86c16-19 31-12 43-34 11-20 24-11 34 6 9 15 21 20 34 5 15-17 26-17 42-3" stroke="#ae8961" stroke-width="3" stroke-linecap="round"/><circle cx="81" cy="59" r="14" fill="#faf5eb" stroke="#ae8961" stroke-width="2"/><path d="m76 59 4 4 7-8" stroke="#6d9274" stroke-width="2"/>`,`<rect x="36" y="30" width="54" height="54" rx="5" fill="#f7fbf2" stroke="#84a273"/><path d="M49 44h28M49 54h18M49 64h24" stroke="#84a273" stroke-width="2" stroke-linecap="round"/><path d="m111 75 19-36 19 36h-38Z" fill="#eff6eb" stroke="#84a273" stroke-width="2"/><path d="M130 49v15" stroke="#b48a53" stroke-width="2"/>`,`<circle cx="81" cy="61" r="27" fill="#fbf7fb" stroke="#a48aa6" stroke-width="2"/><path d="M81 41v20l15 9" stroke="#9a749d" stroke-width="2" stroke-linecap="round"/><path d="M124 43h47M124 57h38M124 71h43" stroke="#b4938c" stroke-width="2" stroke-linecap="round"/>`,`<path d="M42 84h145M53 84V49h34v35M106 84V37h40v47" stroke="#73918c" stroke-width="2.5"/><path d="M115 47h22M115 57h22M61 60h18" stroke="#9ab9ad" stroke-width="2"/><path d="m157 48 9 9-9 9" stroke="#d2ac59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`];return `<svg viewBox="0 0 220 120" fill="none">${paths[i%paths.length]}</svg>`}
+function roleCanAuthor(){return currentRole==='author'||currentRole==='owner'}
+function roleCanReview(){return currentRole==='reviewer'||currentRole==='owner'}
+function canUseSharedQueue(){return roleCanAuthor()&&sharedQueueReady}
+function canEditCurrentLesson(){
+  if(currentScope==='private')return Boolean(currentUser&&currentId);
+  const lesson=lessons.find(item=>item.id===currentId&&item._scope==='internal');
+  return Boolean(lesson&&roleCanAuthor()&&(currentRole==='owner'||lesson.createdByUid===currentUser?.uid)&&['draft','changes_requested'].includes(lesson.status));
+}
+function statusLabel(lesson){
+  if(!lesson)return 'Internal draft';
+  if(lesson._scope==='private')return 'Private legacy draft';
+  return ({draft:'Draft',in_review:'In review',changes_requested:'Changes requested',approved:'Approved · internal'})[lesson.status]||'Internal draft';
+}
 function renderLessons(){
-  document.getElementById('lessonCount').textContent=lessons.length;
-  document.getElementById('statLessons').innerHTML=lessons.length+'<small>created</small>';
+  const sharedCount=lessons.filter(item=>item._scope==='internal').length;
+  document.getElementById('lessonCount').textContent=sharedCount;
+  document.getElementById('statLessons').innerHTML=sharedCount+'<small>shared drafts</small>';
   const el=document.getElementById('modules');
   if(!lessons.length){
-    el.innerHTML='<div class="empty"><div class="empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H20v16H7.5A2.5 2.5 0 0 0 5 21V5.5Z"/><path d="M5 17a2.5 2.5 0 0 1 2.5-2.5H20M9 7h7M9 10h6"/><path d="M12 13v5m-2.5-2.5h5"/></svg></div><div class="empty-copy"><span class="eyebrow">YOUR FIRST LESSON</span><strong>Your library is ready for a good idea.</strong><p>Start with a subject and paste the explanation you have already prepared. You can review every slide before using it.</p></div><button class="primary" type="button" onclick="openBuilder()">Build your first lesson <span aria-hidden="true">→</span></button></div>';
+    const createButton=canUseSharedQueue()?'<button class="primary" type="button" onclick="openBuilder()">Create an internal draft <span aria-hidden="true">→</span></button>':'';
+    const emptyTitle=sharedQueueReady?'No shared lesson drafts yet.':'Internal workspace service is unavailable.';
+    const emptyCopy=sharedQueueReady?'Authors can create drafts for the team. Reviewers can inspect them before internal approval.':'The shared queue needs its callable functions and Firestore read rules deployed. Existing private drafts are still kept in your account.';
+    el.innerHTML=`<div class="empty"><div class="empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H20v16H7.5A2.5 2.5 0 0 0 5 21V5.5Z"/><path d="M5 17a2.5 2.5 0 0 1 2.5-2.5H20M9 7h7M9 10h6"/><path d="M12 13v5m-2.5-2.5h5"/></svg></div><div class="empty-copy"><span class="eyebrow">INTERNAL WORKSPACE</span><strong>${esc(emptyTitle)}</strong><p>${esc(emptyCopy)}</p></div>${createButton}</div>`;
     return;
   }
   el.innerHTML=lessons.map((l,i)=>{
-    const topic=l.topic||'Untitled topic';
-    return `<article class="module" tabindex="0" role="button" aria-label="Open lesson: ${esc(topic)}" onclick="openLesson('${esc(l.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLesson('${esc(l.id)}')}"><div class="thumb c${i%6+1}">${illustration(i)}<span class="type">ACADEMIC LESSON</span></div><div class="module-body"><h3>${esc(topic)}</h3><div class="meta"><span>${esc(l.program||'Program')} · ${esc(l.branch||l.subject||'Subject')}</span><span><i class="status-dot"></i>Saved</span></div><div class="module-footer"><span>${esc(l.module||'Module not set')}</span><span>${(l.slides||[]).length} slides · ${esc(l.date||'Saved')}</span></div></div></article>`;
+    const topic=l.topic||'Untitled topic',status=statusLabel(l),scopeLabel=l._scope==='internal'?'TEAM QUEUE':'PRIVATE LEGACY',author=l.authorEmail||'';
+    return `<article class="module" tabindex="0" role="button" aria-label="Open ${esc(status)} lesson: ${esc(topic)}" onclick="openLesson('${esc(l.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLesson('${esc(l.id)}')}"><div class="thumb c${i%6+1}">${illustration(i)}<span class="type">ACADEMIC LESSON</span></div><div class="module-body"><div class="module-status-row"><span class="status-chip status-${esc(l.status||'private')}">${esc(status)}</span><span class="scope-chip">${scopeLabel}</span></div><h3>${esc(topic)}</h3><div class="meta"><span>${esc(l.program||'Program')} · ${esc(l.branch||l.subject||'Subject')}</span><span>${author?`By ${esc(author)}`:'Saved'}</span></div><div class="module-footer"><span>${esc(l.module||'Module not set')}</span><span>${(l.slides||[]).length} scenes · ${esc(l.date||'Saved')}</span></div></div></article>`;
   }).join('');
 }
 function userLessons(){if(!currentUser)throw new Error('Sign in first');return db.collection('users').doc(currentUser.uid).collection('lessons')}
-async function refreshLessons(){try{const snap=await userLessons().orderBy('updatedAt','desc').get();lessons=snap.docs.map(doc=>{const d=doc.data(),created=d.createdAt?.toDate?.();return {...d,id:doc.id,date:created?created.toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'Just now'}});renderLessons()}catch(e){console.error(e);toast('Could not load lessons. Check Firestore rules and sign-in.')}}
+function internalLessons(){if(!db)throw new Error('Firestore is not ready');return db.collection('internalLessons')}
+async function refreshLessons(){
+  if(!currentUser||!db)return;
+  try{
+    sharedQueueReady=false;
+    const privateSnapshot=await userLessons().orderBy('updatedAt','desc').limit(100).get();
+    let sharedSnapshot={docs:[]};
+    if(currentRole){
+      try{sharedSnapshot=await internalLessons().orderBy('updatedAt','desc').limit(100).get();sharedQueueReady=true;workspaceError=''}
+      catch(error){workspaceError=error.code||'firestore/permission-denied';console.error('Shared lesson queue unavailable:',workspaceError)}
+    }
+    const mapSnapshot=(snapshot,scope)=>snapshot.docs.map(doc=>{
+      const data=doc.data(),created=data.createdAt?.toDate?.(),updated=data.updatedAt?.toMillis?.()||created?.getTime?.()||0;
+      return {...data,id:doc.id,_scope:scope,_updatedMillis:updated,date:created?created.toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'Just now'};
+    });
+    lessons=[...mapSnapshot(sharedSnapshot,'internal'),...mapSnapshot(privateSnapshot,'private')].sort((a,b)=>(b._updatedMillis||0)-(a._updatedMillis||0));
+    renderLessons();updateWorkflowControls();
+  }catch(e){console.error(e);toast('Could not load private drafts. Check Firebase sign-in and Firestore rules.')}
+}
+function updateWorkflowControls(){
+  const lesson=lessons.find(item=>item.id===currentId&&item._scope===currentScope);
+  const status=lesson?.status||'draft',state=document.getElementById('workflowState'),hint=document.getElementById('workflowHint');
+  const share=document.getElementById('shareDraftButton'),submit=document.getElementById('submitReviewButton');
+  const review=document.getElementById('reviewControls'),summary=document.getElementById('reviewSummaryDisplay');
+  const privateDraft=currentScope==='private'&&Boolean(currentId);
+  const newDraft=!currentId;
+  const canEdit=newDraft?roleCanAuthor():canEditCurrentLesson(),controlsEditable=canEdit&&!animationRequestActive&&!workflowActionActive;
+  if(state){state.dataset.status=privateDraft?'private':status;state.textContent=newDraft?(roleCanAuthor()?'New draft':'Read-only'):privateDraft?'Private legacy':statusLabel(lesson)}
+  if(share)share.hidden=!(privateDraft&&canUseSharedQueue()&&Boolean(functionsClient)&&!animationRequestActive&&!workflowActionActive);
+  if(submit)submit.hidden=!(currentScope==='internal'&&lesson&&controlsEditable&&(status==='draft'||status==='changes_requested'));
+  const mayReview=Boolean(currentScope==='internal'&&lesson&&status==='in_review'&&roleCanReview()&&lesson.createdByUid!==currentUser?.uid&&!workflowActionActive);
+  if(review)review.hidden=!mayReview;
+  if(summary){const showSummary=Boolean(lesson?.reviewSummary);summary.hidden=!showSummary;summary.textContent=showSummary?`Reviewer note: ${lesson.reviewSummary}`:''}
+  if(hint){
+    if(workspaceError&&!sharedQueueReady)hint.textContent='Shared internal services or Firestore read rules are unavailable. Existing private drafts remain accessible; deploy the callable functions and Firestore rules to enable the team queue.';
+    else if(newDraft)hint.textContent=canUseSharedQueue()?'New lessons are shared team drafts. Submit them for independent review when ready.':'Your role is read-only or the shared workspace is not ready; ask an owner to check your role and deployment.';
+    else if(privateDraft)hint.textContent='This older draft is private to your account. Copy it into the shared queue when you want a teammate to review it.';
+    else if(status==='draft')hint.textContent=canEdit?'Edit the draft, then submit it for an independent review.':'This author’s draft is visible to the team but only the author or an owner can edit it.';
+    else if(status==='in_review')hint.textContent=mayReview?'Review the source notes, formulas, examples and scenes. You cannot approve your own draft.':'This draft is in the review queue. A different reviewer must approve it or request changes.';
+    else if(status==='changes_requested')hint.textContent=canEdit?'Address the reviewer note; saving edits returns the lesson to draft.':'The author must address the reviewer note before resubmitting.';
+    else if(status==='approved')hint.textContent='Approved internally. This prototype has no customer-facing publishing route.';
+    if(lesson?.reviewSummary&&(status==='changes_requested'||status==='draft'))hint.textContent+=` Reviewer note: ${lesson.reviewSummary}`;
+  }
+  const reviewerNote=document.getElementById('internalReviewSummary');
+  if(reviewerNote){reviewerNote.disabled=!mayReview;if(mayReview&&document.activeElement!==reviewerNote)reviewerNote.value=lesson.reviewSummary||'';}
+  for(const id of ['program','branch','subject','module','topic','notes']){
+    const field=document.getElementById(id);if(field)field.disabled=!controlsEditable;
+  }
+  const buildButton=document.getElementById('buildLessonButton');
+  if(buildButton)buildButton.hidden=!canUseSharedQueue();
+  const draftScopeLabel=document.getElementById('draftScopeLabel');
+  if(draftScopeLabel)draftScopeLabel.textContent=privateDraft?'Private legacy draft · copy to team queue':currentScope==='internal'&&currentId?'Shared team draft · internal review only':'Shared team draft · not published to customers';
+  const scriptToggle=document.getElementById('scriptToggle');
+  if(scriptToggle&&!document.getElementById('scriptList').classList.contains('open'))scriptToggle.textContent=controlsEditable?'Edit script':'Review script';
+  const builderTitle=document.getElementById('builderTitle');
+  if(builderTitle)builderTitle.textContent=currentId?`Lesson · ${lesson?.topic||'Untitled'}`:'New internal lesson';
+  syncScriptEditability();
+  updateAnimationControls();
+}
+function syncScriptEditability(){
+  const panel=document.getElementById('scriptList');
+  if(!panel||typeof panel.querySelectorAll!=='function')return;
+  const editable=canEditCurrentLesson()&&!animationRequestActive&&!workflowActionActive;
+  panel.querySelectorAll('input,textarea').forEach(field=>{field.readOnly=!editable});
+}
 function resetForm(){
+
   document.getElementById('program').value='B.Com';
   for(const id of ['branch','subject','module','topic','notes'])document.getElementById(id).value='';
   document.getElementById('deckTitle').textContent='Lesson preview';
@@ -55,21 +137,34 @@ function resetForm(){
   document.getElementById('scriptList').classList.remove('open');
   document.getElementById('scriptList').innerHTML='<div class="empty-script">Arrange your notes first. Then edit the slide headings and narration text here.</div>';
   document.getElementById('scriptToggle').textContent='Edit script';
-  document.getElementById('buildHint').textContent='Your prepared content stays yours.';
+  document.getElementById('buildHint').textContent=roleCanAuthor()?'The new lesson will be shared with the internal team.':'Your role does not include authoring access.';
   const consent=document.getElementById('aiConsent');
   if(consent)consent.checked=false;
   const status=document.getElementById('animationStatus');
-  if(status)status.textContent='First arrange and save your lesson notes. AI output should be reviewed before teaching.';
-  updateAnimationControls();
+  if(status)status.textContent='Save the shared draft first. AI output must be reviewed before it can be approved internally.';
+  updateWorkflowControls();
 }
-function openBuilder(){stopPlay();stopSceneAnimation();currentId=null;deck=[];slide=0;resetForm();document.getElementById('builder').classList.add('open');document.body.style.overflow='hidden'}
-function closeBuilder(){stopPlay();stopSceneAnimation();document.getElementById('builder').classList.remove('open');document.body.style.overflow='';if(currentId)queueSave()}
-function openLesson(id){
+async function openBuilder(){
+  if(!canUseSharedQueue()){toast('An internal author role and the deployed shared workspace are required to create a draft.');return}
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before opening another draft.');return}
+  try{await flushCurrentSave()}catch(error){console.error('Lesson save before creating a draft failed:',error.code||'unknown');toast('Could not save the current draft. Please try again.');return}
+  stopPlay();stopSceneAnimation();editorRevision++;editorDirty=false;currentId=null;currentScope='internal';deck=[];slide=0;resetForm();
+  document.getElementById('builder').classList.add('open');document.body.style.overflow='hidden';updateWorkflowControls();
+}
+async function closeBuilder(){
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before closing this draft.');return}
+  stopPlay();stopSceneAnimation();
+  try{await flushCurrentSave()}catch(error){console.error('Lesson save on close failed:',error.code||'unknown');toast('Could not save the latest draft edits. The editor is still open.');return}
+  document.getElementById('builder').classList.remove('open');document.body.style.overflow='';
+}
+async function openLesson(id){
   const lesson=lessons.find(x=>x.id===id);
   if(!lesson)return;
-  stopPlay();
-  stopSceneAnimation();
-  currentId=id;
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before opening another lesson.');return}
+  stopPlay();stopSceneAnimation();
+  try{await flushCurrentSave()}catch(error){console.error('Lesson save before navigation failed:',error.code||'unknown');toast('Could not save the previous draft. It is still open; please try again.');return}
+  editorRevision++;editorDirty=false;
+  currentId=id;currentScope=lesson._scope||'private';
   deck=lesson.slides||[];
   slide=0;
   document.getElementById('program').value=lesson.program||'B.Com';
@@ -80,7 +175,7 @@ function openLesson(id){
   document.getElementById('notes').value=lesson.source||'';
   document.getElementById('deckTitle').textContent=lesson.topic||'Lesson preview';
   document.getElementById('deckSub').textContent=[lesson.program,lesson.branch,lesson.subject,lesson.module].filter(Boolean).join(' · ');
-  document.getElementById('buildHint').textContent='Saved in your Firebase account';
+  document.getElementById('buildHint').textContent=currentScope==='internal'?'Shared internal draft · edits are role-controlled':'Private legacy draft · this copy stays in your account';
   document.getElementById('scriptList').classList.remove('open');
   document.getElementById('scriptToggle').textContent='Edit script';
   const consent=document.getElementById('aiConsent');
@@ -89,42 +184,100 @@ function openLesson(id){
   if(status)status.textContent=deck.some(s=>s.animation)?'Animated storyboard saved. Review every scene and formula before teaching.':'Add an animated explanation from your notes when you are ready.';
   document.getElementById('builder').classList.add('open');
   document.body.style.overflow='hidden';
-  renderDeck();
+  renderDeck();updateWorkflowControls();
 }
 function splitSource(text){const sections={concept:[],formula:[],example:[],trick:[],steps:[],other:[]};const labels={concept:/^(concept|explanation|overview|definition|meaning)\s*:?\s*/i,formula:/^(formula|equation|key terms?|important terms?)\s*:?\s*/i,example:/^(worked example|example|application|problem)\s*:?\s*/i,trick:/^(trick|shortcut|memory trick|mnemonic|tips?)\s*:?\s*/i,steps:/^(steps?|process|procedure|how it works)\s*:?\s*/i};let active='other';for(let line of text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){for(const k in labels){if(labels[k].test(line)){active=k;line=line.replace(labels[k],'').trim();break}}if(line)sections[active].push(line)}return sections}
 function getSentences(text){return (String(text||'').replace(/\s+/g,' ').match(/[^.!?]+[.!?]?/g)||[]).map(x=>x.trim()).filter(Boolean)}function summary(parts,n=3){return getSentences(parts.join(' ')).slice(0,n).join(' ').trim()}
 function createSlides(data){const s=splitSource(data.source),concept=summary(s.concept.length?s.concept:s.other.length?s.other:s.steps,3)||data.source.slice(0,420),sentences=getSentences(data.source),steps=(s.steps.length?s.steps:sentences.slice(1,5)).slice(0,4),formula=summary(s.formula,5)||'No formula or key terms were supplied in the source notes.',example=summary(s.example,5)||'No worked example was supplied in the source notes.',trick=summary(s.trick,4)||'No shortcut or memory cue was supplied in the source notes.',recap=summary([...s.concept,...s.formula,...s.trick,...s.other],2)||concept,course=data.program+(data.branch?' · '+data.branch:'');return [{kind:'intro',kicker:course,title:data.topic,body:[data.subject,data.module].filter(Boolean).join('  ·  ')||'A focused concept lesson',steps:[]},{kind:'concept',kicker:'THE CORE IDEA',title:'Start with the main idea',body:concept,steps:[]},{kind:'steps',kicker:'BREAK IT DOWN',title:'How it works',body:'Follow the explanation one step at a time.',steps},{kind:'formula',kicker:'FORMULA & KEY TERMS',title:'Keep this close',body:formula,steps:[]},{kind:'example',kicker:'APPLY THE IDEA',title:'A worked example',body:example,steps:[]},{kind:'trick',kicker:'REMEMBER IT',title:'Shortcut or memory cue',body:trick,steps:[]},{kind:'recap',kicker:'QUICK RECAP',title:'What to remember',body:recap,steps:[]}]}
 async function generateDeck(){
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before arranging another lesson.');return}
   const payload=lessonFormPayload();
+  if(!canUseSharedQueue()){toast('The shared internal queue is unavailable or your role cannot author drafts.');return}
+  if(!functionsClient){toast('The internal lesson service is not deployed yet.');return}
   if(!payload.topic){toast('Add a topic title first.');document.getElementById('topic').focus();return}
   if(payload.source.length<20){toast('Paste your prepared notes (at least a few sentences).');document.getElementById('notes').focus();return}
   stopPlay();stopSceneAnimation();
   const btn=document.querySelector('.build-actions .primary');btn.disabled=true;btn.innerHTML='Arranging slides…';
   try{
-    const slides=createSlides(payload),ref=userLessons().doc(),stamp=firebase.firestore.FieldValue.serverTimestamp(),doc={...payload,slides,createdAt:stamp,updatedAt:stamp};
-    await ref.set(doc);currentId=ref.id;
-    const local={...payload,slides,id:ref.id,date:new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short'})};
-    lessons.unshift(local);renderLessons();deck=slides;slide=0;
-    document.getElementById('buildHint').textContent='Draft saved securely to your Firebase account';
+    const slides=createSlides(payload);
+    const response=await functionsClient.httpsCallable('createInternalLesson')({...payload,slides});
+    const id=response.data.id,now=new Date();
+    editorRevision++;editorDirty=false;currentId=id;currentScope='internal';deck=slides;slide=0;
+    const local={...payload,slides,id,status:'draft',createdByUid:currentUser.uid,authorEmail:currentUser.email||'',_scope:'internal',date:now.toLocaleDateString('en-IN',{day:'numeric',month:'short'}),_updatedMillis:now.getTime()};
+    lessons.unshift(local);renderLessons();
+    document.getElementById('buildHint').textContent='Shared draft saved to the internal review queue';
     document.getElementById('deckTitle').textContent=payload.topic;
     document.getElementById('deckSub').textContent=[payload.program,payload.branch,payload.subject,payload.module].filter(Boolean).join(' · ');
     document.getElementById('scriptList').classList.remove('open');document.getElementById('scriptToggle').textContent='Edit script';
-    setAnimationStatus('Draft saved. Confirm Gemini consent below when you want the animated explanation.');
-    renderDeck();toast('Lesson saved to Firebase. Review the draft, then choose whether to animate it.');
-  }catch(e){console.error(e);toast('Could not save lesson: '+e.message)}
+    setAnimationStatus('Shared draft saved. Confirm Gemini consent when you want the animated explanation.');
+    renderDeck();updateWorkflowControls();
+    toast('Shared internal draft created. Review it, then submit it for independent approval.');
+  }catch(e){console.error('Internal lesson creation failed:',e.code||'unknown');toast(e.message||'Could not create the internal lesson draft.')}
   finally{btn.disabled=false;btn.innerHTML='Arrange into lesson slides <span>→</span>'}
+}
+async function sharePrivateDraft(){
+  if(currentScope!=='private'||!currentId||!deck.length){toast('Open one of your existing private drafts first.');return}
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before sharing this draft.');return}
+  if(!canUseSharedQueue()||!functionsClient){toast('An internal author role, Firestore access and the workspace functions are required to share this draft.');return}
+  workflowActionActive=true;updateWorkflowControls();
+  try{
+    await flushCurrentSave();
+    const payload={...lessonFormPayload(),slides:JSON.parse(JSON.stringify(deck))};
+    const old=lessons.find(item=>item.id===currentId&&item._scope==='private');
+    if(old?.animationProvider==='gemini')payload.animationProvider='gemini';
+    if(old?.animatedStoryboardVersion===1)payload.animatedStoryboardVersion=1;
+    const response=await functionsClient.httpsCallable('createInternalLesson')(payload);
+    const now=new Date(),id=response.data.id;
+    const shared={...payload,id,status:'draft',createdByUid:currentUser.uid,authorEmail:currentUser.email||'',_scope:'internal',date:now.toLocaleDateString('en-IN',{day:'numeric',month:'short'}),_updatedMillis:now.getTime()};
+    editorRevision++;editorDirty=false;lessons.unshift(shared);currentId=id;currentScope='internal';renderLessons();updateWorkflowControls();
+    toast('Copied to the shared internal queue. Your original private draft remains in your account.');
+  }catch(error){console.error('Sharing legacy lesson failed:',error.code||'unknown');toast(error.message||'Could not copy this draft to the team queue.')}
+  finally{workflowActionActive=false;updateWorkflowControls()}
+}
+async function submitForInternalReview(){
+  if(currentScope!=='internal'||!currentId||!canEditCurrentLesson()||animationRequestActive||workflowActionActive){toast('Only the author or an owner can submit this shared draft.');return}
+  workflowActionActive=true;updateWorkflowControls();
+  try{
+    await flushCurrentSave();
+    const response=await functionsClient.httpsCallable('transitionInternalLesson')({id:currentId,action:'submit_for_review'});
+    const lesson=lessons.find(item=>item.id===currentId&&item._scope==='internal');
+    if(lesson)lesson.status=response.data.status;
+    renderLessons();updateWorkflowControls();
+    toast('Draft submitted. A different reviewer must approve it.');
+  }catch(error){console.error('Internal review submission failed:',error.code||'unknown');toast(error.message||'Could not submit this draft for review.')}
+  finally{workflowActionActive=false;updateWorkflowControls()}
+}
+async function reviewInternalLesson(action){
+  if(!['approve','request_changes'].includes(action)){toast('Choose approve or request changes.');return}
+  const lesson=lessons.find(item=>item.id===currentId&&item._scope==='internal');
+  if(currentScope!=='internal'||!currentId||!roleCanReview()||workflowActionActive||animationRequestActive||!lesson||lesson.status!=='in_review'||lesson.createdByUid===currentUser?.uid){toast('A different internal reviewer must review a draft that is in the queue.');return}
+  const reviewSummary=document.getElementById('internalReviewSummary').value.trim();
+  if(action==='request_changes'&&reviewSummary.length<5){toast('Add a short reviewer note before requesting changes.');document.getElementById('internalReviewSummary').focus();return}
+  workflowActionActive=true;updateWorkflowControls();
+  try{
+    const response=await functionsClient.httpsCallable('transitionInternalLesson')({id:currentId,action,reviewSummary});
+    const lesson=lessons.find(item=>item.id===currentId&&item._scope==='internal');
+    if(lesson){lesson.status=response.data.status;lesson.reviewSummary=reviewSummary;lesson.reviewedByUid=currentUser.uid;lesson.reviewedByEmail=currentUser.email||''}
+    renderLessons();updateWorkflowControls();
+    toast(action==='approve'?'Lesson approved for internal use. It is not published to customers.':'Changes requested. The author can edit and resubmit the draft.');
+  }catch(error){console.error('Internal lesson review failed:',error.code||'unknown');toast(error.message||'Could not save the review decision.')}
+  finally{workflowActionActive=false;updateWorkflowControls()}
 }
 function updateAnimationControls(){
   const consent=document.getElementById('aiConsent');
   const animateButton=document.getElementById('animateButton');
   const exportButton=document.getElementById('exportVideoButton');
   const hasAnimation=deck.some(item=>item.animation&&item.animation.visualType);
+  const canGenerate=Boolean(roleCanAuthor()&&canEditCurrentLesson()&&!animationRequestActive&&!workflowActionActive);
   if(animateButton){
-    animateButton.disabled=!deck.length||!currentId||!currentUser||!functionsClient||!consent||!consent.checked;
+    animateButton.disabled=!deck.length||!currentId||!currentUser||!functionsClient||!canGenerate||animationRequestActive||!consent||!consent.checked;
     animateButton.innerHTML=`${hasAnimation?'Refresh animated explanation':'Create animated explanation'} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>`;
   }
-  if(exportButton)exportButton.disabled=!deck.length||typeof window.MediaRecorder!=='function';
+  if(exportButton)exportButton.disabled=animationRequestActive||!deck.length||typeof window.MediaRecorder!=='function';
   if(deck.length&&!functionsClient)setAnimationStatus('Firebase Functions is unavailable in this build. Check that the Functions SDK is loaded before trying Gemini.');
+  else if(deck.length&&currentScope==='internal'&&!sharedQueueReady&&workspaceError)setAnimationStatus('The shared internal workspace is unavailable. Check that the callable functions and Firestore rules are deployed.');
+  else if(deck.length&&(animationRequestActive||workflowActionActive))return;
+  else if(deck.length&&!canGenerate)setAnimationStatus('Only the draft author or an owner can generate or refresh this explanation.');
 }
 function mergeStoryboard(baseDeck,storyboard){
   const order=['intro','concept','steps','formula','example','trick','recap'];
@@ -286,32 +439,48 @@ function setAnimationStatus(message){const status=document.getElementById('anima
 async function generateAnimatedLesson(){
   const consent=document.getElementById('aiConsent');
   if(!consent||!consent.checked){toast('Confirm that these notes can be sent to Gemini first.');return}
-  if(!deck.length||!currentId){toast('Arrange and save this lesson before creating its animation.');return}
-  if(!currentUser||!functionsClient){toast('The signed-in Firebase Functions service is not available yet.');return}
+  if(!deck.length||!currentId){toast('Arrange and save this shared lesson before creating its animation.');return}
+  if(!currentUser||!functionsClient){toast('The internal Firebase Functions service is not available yet.');return}
+  if(!roleCanAuthor()||!canEditCurrentLesson()||workflowActionActive){toast('Only the draft author or an owner can generate this explanation.');return}
+  if(animationRequestActive){toast('An animated explanation is already being generated.');return}
   const payload=lessonFormPayload(),button=document.getElementById('animateButton');
   if(payload.source.length<20){toast('Add a few sentences of prepared notes first.');document.getElementById('notes').focus();return}
-  button.disabled=true;button.textContent='Building your animated explanation…';
+  const targetId=currentId,targetScope=currentScope,targetUid=currentUser.uid,baseDeck=JSON.parse(JSON.stringify(deck));
+  animationRequestActive=true;updateWorkflowControls();button.disabled=true;button.textContent='Building your animated explanation…';
   setAnimationStatus('Gemini is shaping your notes into a simple story and scene plan. This can take a little while.');
   try{
+    await flushCurrentSave();
     const response=await functionsClient.httpsCallable('generateAnimatedLesson')(payload);
-    const animatedDeck=mergeStoryboard(deck,response.data);
-    await userLessons().doc(currentId).update({...payload,slides:animatedDeck,animationProvider:'gemini',animatedStoryboardVersion:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    deck=animatedDeck;
-    const saved=lessons.find(item=>item.id===currentId);
-    if(saved)Object.assign(saved,payload,{slides:animatedDeck});
-    document.getElementById('deckTitle').textContent=response.data.title||payload.topic;
-    document.getElementById('deckSub').textContent=[payload.program,payload.branch,payload.subject,payload.module].filter(Boolean).join(' · ');
-    document.getElementById('buildHint').textContent='Animated storyboard saved to your Firebase account';
-    consent.checked=false;
-    renderDeck();
-    setAnimationStatus('Your seven-scene explainer is ready. Play it, review every explanation, then export the animated visuals.');
-    toast('Animated explanation created and saved. Review it before teaching or sharing.');
+    const animatedDeck=mergeStoryboard(baseDeck,response.data);
+    const savePayload={...payload,id:targetId,slides:animatedDeck,animationProvider:'gemini',animatedStoryboardVersion:1};
+    let saveResult;
+    if(targetScope==='internal')saveResult=await functionsClient.httpsCallable('saveInternalLesson')(savePayload);
+    else{
+      const {id:ignoredId,...privatePayload}=savePayload;
+      await db.collection('users').doc(targetUid).collection('lessons').doc(targetId).update({...privatePayload,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      saveResult={data:{status:'private'}};
+    }
+    const saved=lessons.find(item=>item.id===targetId&&item._scope===targetScope);
+    if(saved)Object.assign(saved,payload,{slides:animatedDeck,animationProvider:'gemini',animatedStoryboardVersion:1,status:saveResult.data.status||saved.status});
+    if(currentId===targetId&&currentScope===targetScope&&currentUser?.uid===targetUid){
+      deck=animatedDeck;
+      document.getElementById('deckTitle').textContent=response.data.title||payload.topic;
+      document.getElementById('deckSub').textContent=[payload.program,payload.branch,payload.subject,payload.module].filter(Boolean).join(' · ');
+      document.getElementById('buildHint').textContent=targetScope==='internal'?'Animated storyboard saved to the shared internal draft':'Animated storyboard saved to your private draft';
+      consent.checked=false;
+      renderDeck();updateWorkflowControls();
+      setAnimationStatus('Your seven-scene explainer is ready. Review every explanation, formula and example, then send it to a different reviewer.');
+    }
+    toast('Animated draft updated. Review every scene before submitting it to the team.');
   }catch(error){
     console.error('Animated lesson request failed:',error.code||'unknown');
     const message=error&&error.message?error.message:'Could not create the animated explanation.';
-    setAnimationStatus(message);
+    if(currentId===targetId&&currentScope===targetScope)setAnimationStatus(message);
     toast(message.length>150?'Could not create the animated explanation. Check the backend setup and try again.':message);
-  }finally{updateAnimationControls()}
+  }finally{
+    animationRequestActive=false;
+    updateWorkflowControls();
+  }
 }
 async function downloadAnimatedVideo(){
   if(!deck.length){toast('Create a lesson draft before exporting a video.');return}
@@ -388,19 +557,99 @@ function setTransitionPause(value){const pause=Number(value);if(![0,2000,4000,60
 function toggleScript(){
   const panel=document.getElementById('scriptList');
   if(!deck.length){toast('Create the slide draft first.');return}
+  const editable=canEditCurrentLesson()&&!animationRequestActive&&!workflowActionActive;
   panel.classList.toggle('open');
-  document.getElementById('scriptToggle').textContent=panel.classList.contains('open')?'Hide editor':'Edit script';
+  document.getElementById('scriptToggle').textContent=panel.classList.contains('open')?'Hide editor':editable?'Edit script':'Review script';
   if(panel.classList.contains('open')){
-    panel.innerHTML=deck.map((s,i)=>`<div class="script-slide"><span>SCENE ${String(i+1).padStart(2,'0')} · ${esc(s.kicker)}</span><input value="${esc(s.title)}" aria-label="Scene title" oninput="updateSlide(${i},'title',this.value)"><textarea aria-label="On-screen explanation" oninput="updateSlide(${i},'body',this.value)">${esc(s.body)}</textarea><textarea aria-label="Narration script" oninput="updateSlide(${i},'narration',this.value)">${esc(s.narration||getSlideNarrationText(i))}</textarea>${(s.steps||[]).map((st,j)=>`<textarea aria-label="Step ${j+1}" oninput="updateStep(${i},${j},this.value)">${esc(st)}</textarea>`).join('')}</div>`).join('')+'<div class="alert"><b>Review before use:</b> Gemini may add general explanatory context. Check each scene, example and formula against your course material.</div>';
+    const overallNote=deck.find(scene=>scene.animation?.overallReviewNote)?.animation?.overallReviewNote||'AI may add general explanatory context. Check every scene, example and formula against the course source.';
+    panel.innerHTML=deck.map((s,i)=>`<div class="script-slide"><span>SCENE ${String(i+1).padStart(2,'0')} · ${esc(s.kicker)}</span><input value="${esc(s.title)}" aria-label="Scene title" ${editable?`oninput="updateSlide(${i},'title',this.value)"`:'readonly'}><textarea aria-label="On-screen explanation" ${editable?`oninput="updateSlide(${i},'body',this.value)"`:'readonly'}>${esc(s.body)}</textarea><textarea aria-label="Narration script" ${editable?`oninput="updateSlide(${i},'narration',this.value)"`:'readonly'}>${esc(s.narration||getSlideNarrationText(i))}</textarea>${(s.steps||[]).map((st,j)=>`<textarea aria-label="Step ${j+1}" ${editable?`oninput="updateStep(${i},${j},this.value)"`:'readonly'}>${esc(st)}</textarea>`).join('')}${s.animation?.reviewNote?`<div class="scene-review-note"><b>AI review cue:</b> ${esc(s.animation.reviewNote)}</div>`:''}</div>`).join('')+`<div class="alert"><b>Review before use:</b> ${esc(overallNote)} No customer publishing happens from this workspace.</div>`;
   }
 }
-function updateSlide(i,key,value){deck[i][key]=value;if(i===slide){if(playbackState!=='stopped'||activeUtterance)stopPlay();renderSlide(i)}queueSave()}
-function updateStep(i,j,value){deck[i].steps[j]=value;if(i===slide){if(playbackState!=='stopped'||activeUtterance)stopPlay();renderSlide(i)}queueSave()}
-function queueSave(){if(!currentId||!currentUser)return;clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{await userLessons().doc(currentId).update({slides:deck,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});const item=lessons.find(x=>x.id===currentId);if(item)item.slides=deck}catch(e){console.error(e);toast('Could not save edits: '+e.message)}},500)}
+function updateSlide(i,key,value){if(!canEditCurrentLesson()||animationRequestActive||workflowActionActive)return;deck[i][key]=value;if(i===slide){if(playbackState!=='stopped'||activeUtterance)stopPlay();renderSlide(i)}queueSave()}
+function updateStep(i,j,value){if(!canEditCurrentLesson()||animationRequestActive||workflowActionActive)return;deck[i].steps[j]=value;if(i===slide){if(playbackState!=='stopped'||activeUtterance)stopPlay();renderSlide(i)}queueSave()}
+function cancelScheduledSave(){
+  if(saveTimer!==null){clearTimeout(saveTimer);saveTimer=null}
+}
+async function persistCurrentLesson(){
+  if(!currentId||!currentUser||!canEditCurrentLesson())return false;
+  const targetId=currentId,targetScope=currentScope,targetUid=currentUser.uid;
+  if(activeSave){
+    await activeSave;
+    if(currentId!==targetId||currentScope!==targetScope||currentUser?.uid!==targetUid)return false;
+    if(!editorDirty)return true;
+    return persistCurrentLesson();
+  }
+  if(!editorDirty)return false;
+  const id=currentId,scope=currentScope,userId=currentUser.uid,revision=editorRevision;
+  const lessonFields=lessonFormPayload(),slidesSnapshot=JSON.parse(JSON.stringify(deck)),payload={...lessonFields,id,slides:slidesSnapshot};
+  const item=lessons.find(x=>x.id===id&&x._scope===scope);
+  if(item?.animationProvider==='gemini')payload.animationProvider='gemini';
+  if(item?.animatedStoryboardVersion===1)payload.animatedStoryboardVersion=1;
+  const operation=(async()=>{
+    if(scope==='internal')return functionsClient.httpsCallable('saveInternalLesson')(payload);
+    const {id:ignoredId,...privatePayload}=payload;
+    await db.collection('users').doc(userId).collection('lessons').doc(id).update({...privatePayload,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    return {data:{status:item?.status||'private'}};
+  })();
+  activeSave=operation;
+  try{
+    const result=await operation;
+    if(item){item.slides=slidesSnapshot;item.status=result?.data?.status||item.status;Object.assign(item,lessonFields)}
+    if(currentId===id&&currentScope===scope&&currentUser?.uid===userId&&editorRevision===revision)editorDirty=false;
+    renderLessons();updateWorkflowControls();
+    return true;
+  }catch(error){
+    if(currentId===id&&currentScope===scope&&currentUser?.uid===userId&&editorRevision===revision)editorDirty=true;
+    throw error;
+  }finally{
+    if(activeSave===operation)activeSave=null;
+  }
+}
+async function flushCurrentSave(){
+  cancelScheduledSave();
+  if(activeSave)await activeSave;
+  if(!editorDirty)return false;
+  return persistCurrentLesson();
+}
+function queueSave(){
+  if(!currentId||!currentUser||!canEditCurrentLesson()||animationRequestActive||workflowActionActive)return;
+  editorDirty=true;editorRevision++;
+  cancelScheduledSave();
+  const scheduledId=setTimeout(async()=>{
+    if(saveTimer!==scheduledId)return;
+    saveTimer=null;
+    try{await persistCurrentLesson()}
+    catch(e){console.error('Lesson autosave failed:',e.code||'unknown');toast(e.message||'Could not save edits. The draft may have changed status.')}
+  },500);
+  saveTimer=scheduledId;
+}
 async function signIn(event){event.preventDefault();const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,button=document.getElementById('loginButton'),error=document.getElementById('authError');error.textContent='';button.disabled=true;button.textContent='Signing in…';try{await auth.signInWithEmailAndPassword(email,password)}catch(e){error.textContent=e.code==='auth/invalid-credential'?'Email or password is incorrect.':e.message}finally{button.disabled=false;button.textContent='Sign in'}}
-async function signOut(){stopPlay();stopSceneAnimation();try{await auth.signOut()}catch(e){toast('Could not sign out: '+e.message)}}
-function showApp(user){currentUser=user;document.getElementById('authGate').style.display='none';document.getElementById('home').style.display='flex';document.getElementById('signedInEmail').textContent=user.email||'Signed in';const av=document.getElementById('userAvatar');av.textContent=(user.email||'U').slice(0,2).toUpperCase();refreshLessons()}
-function showLogin(){stopPlay();stopSceneAnimation();currentUser=null;lessons=[];deck=[];renderLessons();updateAnimationControls();document.getElementById('builder').classList.remove('open');document.body.style.overflow='';document.getElementById('home').style.display='none';document.getElementById('authGate').style.display='flex'}
+async function signOut(){
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before signing out.');return}
+  stopPlay();stopSceneAnimation();
+  try{await flushCurrentSave();await auth.signOut()}catch(e){toast('Could not save or sign out: '+e.message)}
+}
+async function showApp(user){
+  currentUser=user;currentRole=null;sharedQueueReady=false;workspaceError='';
+  document.getElementById('authGate').style.display='none';document.getElementById('home').style.display='flex';
+  document.getElementById('signedInEmail').textContent=user.email||'Signed in';
+  const av=document.getElementById('userAvatar');av.textContent=(user.email||'U').slice(0,2).toUpperCase();
+  const roleLabel=document.getElementById('workspaceRole');if(roleLabel)roleLabel.textContent='Checking workspace role…';
+  if(functionsClient){
+    try{
+      const response=await functionsClient.httpsCallable('getInternalWorkspace')({});
+      currentRole=response.data.role;
+      workspaceError='';
+    }catch(error){workspaceError=error.code||'workspace/unavailable';console.error('Internal workspace lookup failed:',workspaceError)}
+  }else workspaceError='functions/unavailable';
+  if(roleLabel)roleLabel.textContent=currentRole==='owner'?'Owner · author + reviewer':currentRole==='reviewer'?'Internal reviewer':currentRole==='author'?'Internal author':'Workspace service unavailable';
+  await refreshLessons();updateWorkflowControls();
+}
+function showLogin(){
+  stopPlay();stopSceneAnimation();cancelScheduledSave();editorRevision++;editorDirty=false;animationRequestActive=false;workflowActionActive=false;currentUser=null;currentRole=null;sharedQueueReady=false;workspaceError='';currentId=null;currentScope='shared';lessons=[];deck=[];
+  const roleLabel=document.getElementById('workspaceRole');if(roleLabel)roleLabel.textContent='Signed out';
+  renderLessons();updateWorkflowControls();document.getElementById('builder').classList.remove('open');document.body.style.overflow='';document.getElementById('home').style.display='none';document.getElementById('authGate').style.display='flex';
+}
 function initFirebase(){
   if(!window.firebase||!window.FIREBASE_CONFIG){document.getElementById('authError').textContent='Firebase setup is missing. Check firebase-config.js and the Firebase SDK scripts.';document.getElementById('authGate').style.display='flex';return}
   try{
@@ -411,4 +660,4 @@ function initFirebase(){
     auth.onAuthStateChanged(user=>user?showApp(user):showLogin());
   }catch(e){console.error(e);document.getElementById('authError').textContent='Firebase initialization failed: '+e.message;document.getElementById('authGate').style.display='flex'}
 }
-initializePlaybackControls();document.querySelectorAll('.nav button[data-nav]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button[data-nav]').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.nav==='My lessons')document.querySelector('.section-title').scrollIntoView({behavior:'smooth'});else if(b.dataset.nav==='Template')toast('Choose Campus, Notebook, or Midnight; the seven-slide lesson flow stays consistent.');else window.scrollTo({top:0,behavior:'smooth'})});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('builder').classList.contains('open'))closeBuilder();if(document.getElementById('builder').classList.contains('open')&&deck.length){if(e.key==='ArrowRight')nextSlide();if(e.key==='ArrowLeft')prevSlide()}});if(window.addEventListener)window.addEventListener('pagehide',()=>{stopPlay();stopSceneAnimation()});initFirebase();
+initializePlaybackControls();document.querySelectorAll('.nav button[data-nav]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button[data-nav]').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.nav==='My lessons'){refreshLessons();document.querySelector('.section-title').scrollIntoView({behavior:'smooth'})}else if(b.dataset.nav==='Template')toast('Choose Campus, Notebook, or Midnight; the seven-slide lesson flow stays consistent.');else window.scrollTo({top:0,behavior:'smooth'})});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('builder').classList.contains('open'))closeBuilder();if(document.getElementById('builder').classList.contains('open')&&deck.length){if(e.key==='ArrowRight')nextSlide();if(e.key==='ArrowLeft')prevSlide()}});if(window.addEventListener)window.addEventListener('pagehide',()=>{stopPlay();stopSceneAnimation()});initFirebase();

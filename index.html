@@ -362,6 +362,13 @@
       border-radius: 5px;
     }
     .module-body { padding: 15px 16px 13px; }
+    .module-status-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+    .status-chip, .scope-chip { display: inline-flex; align-items: center; min-height: 20px; padding: 3px 7px; color: #60695b; font-size: 8px; font-weight: 800; letter-spacing: .35px; background: #f0f1e8; border: 1px solid #e3e5d9; border-radius: 99px; }
+    .status-chip.status-in_review { color: #536c77; background: #eaf0f1; border-color: #d5e0e3; }
+    .status-chip.status-changes_requested { color: #875f36; background: #f8efe1; border-color: #eadcc6; }
+    .status-chip.status-approved { color: #3f684e; background: #e8f1e8; border-color: #d3e3d3; }
+    .status-chip.status-private { color: #6f6880; background: #f0edf5; border-color: #e3deec; }
+    .scope-chip { color: #73796d; font-size: 7px; background: #fffefa; }
     .module-body h3 { overflow: hidden; margin: 0 0 8px; color: var(--ink); font-family: var(--serif); font-size: 18px; font-weight: 500; letter-spacing: -.15px; text-overflow: ellipsis; white-space: nowrap; }
     .meta, .module-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 10px; }
     .meta > span:first-child, .module-footer > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -742,6 +749,8 @@
     .script-slide > span { color: #74836e; font-size: 8px; font-weight: 800; letter-spacing: 1px; }
     .script-slide input, .script-slide textarea { width: 100%; padding: 9px 10px; color: var(--ink); font-size: 11px; background: #fff; border: 1px solid #dddcd2; border-radius: 8px; }
     .script-slide textarea { min-height: 78px; resize: vertical; line-height: 1.55; }
+    .scene-review-note { padding: 8px 10px; color: #725837; font-size: 9px; line-height: 1.55; background: #fbf5e9; border: 1px solid #eee2ca; border-radius: 8px; }
+    .scene-review-note b { color: #69522f; }
     .empty-script { padding: 13px; color: var(--muted); font-size: 10px; line-height: 1.55; background: #f7f6f0; border: 1px dashed #e2e0d7; border-radius: 10px; }
     .animation-maker { display: grid; gap: 11px; margin: 13px 15px 0; padding: 14px; background: linear-gradient(135deg, #f1f3eb, #f7f4e9); border: 1px solid #e5e8dc; border-radius: 12px; }
     .animation-maker-head { display: flex; align-items: flex-start; gap: 10px; }
@@ -760,6 +769,20 @@
     .animation-actions button:disabled { opacity: .55; }
     .animation-status { color: #697565; font-size: 9px; line-height: 1.5; }
     .animation-export-note { color: var(--muted-soft); font-size: 8px; line-height: 1.5; }
+    .workflow-card { display: grid; gap: 10px; margin: 13px 15px 0; padding: 14px; background: #fffefa; border: 1px solid var(--line); border-radius: 12px; }
+    .workflow-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .workflow-head strong { display: block; color: var(--ink); font-family: var(--serif); font-size: 16px; font-weight: 500; }
+    .workflow-head p, .workflow-hint { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+    .workflow-state { flex: 0 0 auto; padding: 5px 8px; color: #5d6b5d; font-size: 8px; font-weight: 800; background: #eff1e8; border-radius: 999px; }
+    .workflow-state[data-status="in_review"] { color: #536c77; background: #eaf0f1; }
+    .workflow-state[data-status="changes_requested"] { color: #875f36; background: #f8efe1; }
+    .workflow-state[data-status="approved"] { color: #3f684e; background: #e8f1e8; }
+    .workflow-actions, .review-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .workflow-actions button, .review-actions button { min-height: 38px; padding: 8px 11px; font-size: 9px; }
+    .review-controls { display: grid; gap: 8px; padding-top: 9px; border-top: 1px solid #eeece4; }
+    .review-controls label { color: var(--ink-soft); font-size: 9px; font-weight: 700; }
+    .review-controls textarea { width: 100%; min-height: 72px; padding: 9px 10px; color: var(--ink); font-size: 10px; line-height: 1.5; background: #fff; border: 1px solid #dddcd2; border-radius: 8px; resize: vertical; }
+    .review-summary { padding: 9px 11px; color: #725837; font-size: 9px; line-height: 1.55; background: #fbf5e9; border: 1px solid #eee2ca; border-radius: 9px; }
     .alert { margin: 13px 15px 0; padding: 12px 14px; color: #6e715f; font-size: 9px; line-height: 1.65; background: #f6f3e8; border: 1px solid #eee7d5; border-radius: 10px; }
     .alert b { color: #566449; }
     .render-note { max-width: 950px; margin: 19px auto 0; color: var(--muted-soft); font-size: 10px; line-height: 1.65; text-align: center; }
@@ -903,8 +926,8 @@
       .player-controls .play { min-width: 114px; padding-right: 10px; padding-left: 10px; }
       .player-controls .slide-index { min-width: 65px; }
       .playback-settings { margin-right: 10px; margin-left: 10px; padding: 12px; }
-      .slide-strip, .script-list, .alert, .animation-maker { margin-right: 10px; margin-left: 10px; }
-      .animation-maker { padding: 12px; }
+      .slide-strip, .script-list, .alert, .animation-maker, .workflow-card { margin-right: 10px; margin-left: 10px; }
+      .animation-maker, .workflow-card { padding: 12px; }
       .animation-actions button { width: 100%; }
       .settings-grid { grid-template-columns: minmax(0, 1fr); }
       .setting-control select { min-height: 44px; }
@@ -940,7 +963,7 @@
       </div>
       <div class="auth-panel">
         <h1 id="authHeading">Welcome back.</h1>
-        <p class="auth-sub">Sign in to your private teaching workspace.</p>
+        <p class="auth-sub">Sign in to the internal lesson workspace.</p>
         <form onsubmit="signIn(event)">
           <div class="auth-field">
             <label for="loginEmail">Email address</label>
@@ -953,7 +976,7 @@
           <button class="primary auth-submit" id="loginButton" type="submit">Sign in <span aria-hidden="true">→</span></button>
           <p class="auth-error" id="authError" role="alert" aria-live="polite"></p>
         </form>
-        <p class="auth-note"><strong>Private by design.</strong> Access is managed for approved accounts. Your lessons are stored in your signed-in Firebase account.</p>
+        <p class="auth-note"><strong>Internal by design.</strong> Access is managed by approved team roles. Shared drafts are visible to authorized staff; there is no student or customer publishing in this prototype.</p>
       </div>
     </section>
   </main>
@@ -974,7 +997,7 @@
         </button>
         <button type="button" data-nav="My lessons">
           <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z"/><path d="M4 17a2.5 2.5 0 0 1 2.5-2.5H20M8 7h8M8 10h7"/></svg>
-          My lessons <span id="lessonCount">0</span>
+          Internal queue <span id="lessonCount">0</span>
         </button>
         <button type="button" data-nav="Template">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>
@@ -994,12 +1017,12 @@
       </nav>
       <div class="side-bottom">
         <div class="plan">
-          <div class="plan-head"><i class="plan-dot" aria-hidden="true"></i><span>Private workspace</span></div>
-          <p>Your prepared academic content stays in your account. Not published to students.</p>
+          <div class="plan-head"><i class="plan-dot" aria-hidden="true"></i><span>Internal workspace</span></div>
+          <p>Team drafts are shared for review. Approval here does not publish content to customers.</p>
         </div>
         <div class="profile">
           <div class="avatar" aria-hidden="true">ME</div>
-          <div><strong>Course creator</strong><small>Personal teaching space</small></div>
+          <div><strong>Content team</strong><small id="workspaceRole">Checking workspace role…</small></div>
         </div>
       </div>
     </aside>
@@ -1016,21 +1039,21 @@
       <div class="main">
         <section class="hello" aria-labelledby="welcomeHeading">
           <div>
-            <div class="kicker">YOUR ACADEMIC CONTENT WORKSPACE</div>
-            <h1 id="welcomeHeading">Turn your notes into a clear lesson.</h1>
-            <p>Bring the explanations, formulas and shortcuts you already prepared. Review a thoughtful, consistent slide deck at your own pace.</p>
+            <div class="kicker">INTERNAL CONTENT AUTHORING</div>
+            <h1 id="welcomeHeading">Create together. Review before internal approval.</h1>
+            <p>Draft animated lessons from prepared course material, share them with the team and require an independent review before internal approval.</p>
           </div>
-          <button class="primary" type="button" onclick="openBuilder()">
+          <button class="primary" id="buildLessonButton" type="button" onclick="openBuilder()">
             <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            Build a lesson
+            New internal draft
           </button>
         </section>
 
         <section class="hero" aria-labelledby="heroHeading">
           <div class="hero-copy">
-            <div class="kicker">YOUR NOTES, A TEACHABLE FLOW</div>
-            <h2 id="heroHeading">A little more clarity in every classroom.</h2>
-            <p>From B.Com to B.Tech, use one steady lesson structure across subjects—while keeping your prepared content at the centre.</p>
+            <div class="kicker">A SHARED EDITORIAL WORKFLOW</div>
+            <h2 id="heroHeading">One clear lesson. A second pair of eyes.</h2>
+            <p>Keep course notes at the centre, turn them into animated scenes, and route every AI-assisted draft through a human reviewer.</p>
           </div>
           <div class="hero-art" aria-hidden="true">
             <svg viewBox="0 0 200 120" fill="none">
@@ -1049,28 +1072,28 @@
 
         <section class="stats" aria-label="Workspace overview">
           <div class="stat">
-            <span class="stat-label">Your lesson library</span>
-            <b id="statLessons">0<small>created</small></b>
+            <span class="stat-label">Shared internal lessons</span>
+            <b id="statLessons">0<small>in workspace</small></b>
           </div>
           <div class="stat">
-            <span class="stat-label">A steady teaching flow</span>
-            <b>07<small>slides per lesson</small></b>
+            <span class="stat-label">A human review gate</span>
+            <b>03<small>access roles</small></b>
           </div>
           <div class="stat">
-            <span class="stat-label">Made to suit your style</span>
-            <b>03<small>visual themes</small></b>
+            <span class="stat-label">Fixed lesson structure</span>
+            <b>07<small>animated scenes</small></b>
           </div>
         </section>
 
         <section aria-labelledby="libraryHeading">
           <div class="section-title">
             <div>
-              <h2 id="libraryHeading">Recent lessons</h2>
-              <p>Your private collection of prepared teaching material.</p>
+              <h2 id="libraryHeading">Internal review queue</h2>
+              <p>Shared with approved team members. Only authors edit drafts; a different reviewer approves them.</p>
             </div>
             <div class="library-note">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 2.9 8 7 10 4.1-2 7-5.2 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
-              Saved to your account
+              Internal only · no customer publishing
             </div>
           </div>
           <div class="modules" id="modules" aria-live="polite"></div>
@@ -1089,8 +1112,8 @@
           <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 12 4l8 15H4Z"/><path d="M8.5 15h7M12 11l4 8"/></svg></div>
         </div>
         <div>
-          <strong id="builderTitle">New academic lesson</strong>
-          <span class="saved">Private draft · saved to your account</span>
+          <strong id="builderTitle">New internal lesson</strong>
+          <span class="saved" id="draftScopeLabel">Shared team draft · not published to customers</span>
         </div>
       </div>
       <div>
@@ -1103,9 +1126,9 @@
 
     <div class="builder-body">
       <div class="builder-heading">
-        <div class="kicker">LESSON BUILDER</div>
-        <h1>Start with the notes you trust.</h1>
-        <p>Set the course context, then paste your prepared material. Start with a notes-only draft; if you choose Gemini animation, it can add plain-language context for you to review.</p>
+        <div class="kicker">INTERNAL LESSON AUTHORING</div>
+        <h1>Start with the source the team trusts.</h1>
+        <p>Set the course context and add approved source notes. AI may draft plain-language explanations; an independent reviewer must approve the shared lesson for internal use.</p>
       </div>
 
       <div class="steps" aria-label="Lesson creation steps">
@@ -1128,7 +1151,7 @@
             <div class="field-row">
               <div class="field">
                 <label for="program">Program</label>
-                <select id="program">
+                <select id="program" onchange="queueSave()">
                   <option>B.Com</option>
                   <option>B.Sc</option>
                   <option>BBA</option>
@@ -1139,26 +1162,26 @@
               </div>
               <div class="field">
                 <label for="branch">Branch / specialization</label>
-                <input id="branch" placeholder="e.g. CSE, Finance, Physics">
+                <input id="branch" placeholder="e.g. CSE, Finance, Physics" oninput="queueSave()">
               </div>
             </div>
             <div class="field-row">
               <div class="field">
                 <label for="subject">Subject</label>
-                <input id="subject" placeholder="e.g. Data Structures">
+                <input id="subject" placeholder="e.g. Data Structures" oninput="queueSave()">
               </div>
               <div class="field">
                 <label for="module">Module / unit</label>
-                <input id="module" placeholder="e.g. Module 2 · Trees and graphs">
+                <input id="module" placeholder="e.g. Module 2 · Trees and graphs" oninput="queueSave()">
               </div>
             </div>
             <div class="field">
               <label for="topic">Lesson topic <span class="required-label">Required</span></label>
-              <input id="topic" placeholder="e.g. Binary search trees" required>
+              <input id="topic" placeholder="e.g. Binary search trees" required oninput="queueSave()">
             </div>
             <div class="field">
               <label for="notes">Your prepared notes</label>
-              <textarea id="notes" placeholder="Paste the explanation, formulas, worked examples, tricks and shortcuts you prepared. Headings can help, for example:\n\nCONCEPT / EXPLANATION:\n…\n\nFORMULA / KEY TERMS:\n…\n\nWORKED EXAMPLE:\n…\n\nTRICK / SHORTCUT:\n…\n\nNormal notes work too; labeled sections are optional."></textarea>
+              <textarea id="notes" placeholder="Paste the explanation, formulas, worked examples, tricks and shortcuts you prepared. Headings can help, for example:\n\nCONCEPT / EXPLANATION:\n…\n\nFORMULA / KEY TERMS:\n…\n\nWORKED EXAMPLE:\n…\n\nTRICK / SHORTCUT:\n…\n\nNormal notes work too; labeled sections are optional." oninput="queueSave()"></textarea>
               <div class="helper">Tip: label formulas and worked examples so they’re easier to review on their matching slides.</div>
             </div>
             <div class="template-lock">
@@ -1277,13 +1300,36 @@
             <small class="animation-status" id="animationStatus" aria-live="polite">First arrange and save your lesson notes. AI output should be reviewed before teaching.</small>
             <small class="animation-export-note">Notes are sent to Gemini only when you consent and generate. WebM export includes animated visuals and captions; browser narration plays in the preview but is not embedded in the export yet.</small>
           </section>
+          <section class="workflow-card" aria-labelledby="workflowHeading">
+            <div class="workflow-head">
+              <div>
+                <strong id="workflowHeading">Team review status</strong>
+                <p id="workflowHint">Save a shared draft, then submit it for a different reviewer. Approval is internal only.</p>
+              </div>
+              <span class="workflow-state" id="workflowState" data-status="draft">Not saved</span>
+            </div>
+            <div class="review-summary" id="reviewSummaryDisplay" hidden></div>
+            <div class="workflow-actions">
+              <button class="secondary-action" id="shareDraftButton" type="button" onclick="sharePrivateDraft()" hidden>Copy private draft to team queue</button>
+              <button class="primary" id="submitReviewButton" type="button" onclick="submitForInternalReview()" hidden>Submit for review</button>
+            </div>
+            <div class="review-controls" id="reviewControls" hidden>
+              <label for="internalReviewSummary">Reviewer note <span class="required-label">Required if requesting changes</span></label>
+              <textarea id="internalReviewSummary" maxlength="1200" placeholder="Check the explanation against the source notes. Note any formula, example or course-specific fact that needs correction."></textarea>
+              <div class="review-actions">
+                <button class="secondary-action" id="requestChangesButton" type="button" onclick="reviewInternalLesson('request_changes')">Request changes</button>
+                <button class="primary" id="approveLessonButton" type="button" onclick="reviewInternalLesson('approve')">Approve internally</button>
+              </div>
+            </div>
+            <small class="workflow-hint">Approved lessons remain inside this internal prototype. No customer-facing publish route is enabled.</small>
+          </section>
           <div class="script-list" id="scriptList">
             <div class="empty-script">Arrange your notes first. Then edit the slide headings and narration text here.</div>
           </div>
           <div class="alert"><b>Review note:</b> Gemini can add plain-language context and examples, but AI output may be wrong. Check every formula, example and course-specific claim before teaching. Animations are built from safe, pre-defined vector scenes—not generated code.</div>
         </section>
       </div>
-      <p class="render-note">Lessons are stored in your signed-in Firebase account. Keep student-identifiable information out unless your institution has approved its use.</p>
+      <p class="render-note">Shared internal drafts are readable only by approved staff and are written through Firebase Functions. Keep student-identifiable information out unless your institution has approved its use.</p>
     </div>
   </div>
 
