@@ -562,21 +562,63 @@
     .builder-heading h1 { margin: 6px 0 5px; color: var(--ink); font-family: var(--serif); font-size: clamp(26px, 2.7vw, 35px); font-weight: 500; letter-spacing: -.7px; line-height: 1.14; }
     .builder-heading p { max-width: 760px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
     .steps {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      margin-bottom: 17px;
-      padding: 13px 16px;
-      background: rgba(255, 254, 250, .84);
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      align-items: start;
+      gap: 5px;
+      margin-bottom: 15px;
+      padding: 14px 16px 11px;
+      overflow: hidden;
+      background: rgba(255, 254, 250, .88);
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
     }
-    .step { display: flex; min-width: 0; flex: 1 1 0; align-items: center; gap: 8px; color: #8a9288; font-size: 10px; font-weight: 700; white-space: nowrap; }
-    .step i { display: grid; flex: 0 0 23px; width: 23px; height: 23px; place-items: center; color: #7b857b; font-size: 9px; font-style: normal; background: #f5f4ee; border: 1px solid #e2e2d8; border-radius: 50%; }
+    .steps-track { position: absolute; top: 28px; right: 8.5%; left: 8.5%; height: 2px; overflow: hidden; background: #e7e5dc; border-radius: 2px; }
+    .steps-track span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #6d9477, #c39b5f); border-radius: inherit; transition: width .3s ease; }
+    .step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 7px; padding: 0 2px; color: #8a9288; font-size: 9px; font-weight: 750; background: transparent; border: 0; cursor: pointer; }
+    .step i { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; color: #7b857b; font-size: 9px; font-style: normal; background: #f5f4ee; border: 1px solid #e2e2d8; border-radius: 50%; box-shadow: 0 0 0 5px #fffefa; transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease; }
+    .step span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .step.active { color: var(--forest); }
-    .step.active i { color: #fff; background: var(--forest); border-color: var(--forest); }
-    .step:after { height: 1px; flex: 1 1 auto; margin: 0 13px; background: #e7e5dc; content: ""; }
-    .step:last-child:after { display: none; }
+    .step.active i { color: #fff; background: var(--forest); border-color: var(--forest); transform: translateY(-1px); }
+    .step.complete { color: #617760; }
+    .step.complete i { color: #fff; background: #849779; border-color: #849779; }
+    .step:disabled { cursor: not-allowed; opacity: .56; }
+    .step:focus-visible { outline: 2px solid #78977e; outline-offset: 4px; border-radius: 7px; }
+    .review-route { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: -3px 0 17px; padding: 11px 14px; background: linear-gradient(110deg, #f3f1e7, #f8f5eb); border: 1px solid #eae6d7; border-radius: 12px; }
+    .review-route-label { flex: 0 0 auto; color: #788266; font-size: 8px; font-weight: 850; letter-spacing: 1px; }
+    .review-route-flow { display: flex; flex: 1 1 auto; align-items: center; justify-content: flex-end; gap: 9px; color: var(--ink-soft); font-size: 9px; font-weight: 750; }
+    .review-route-flow span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .review-route-flow i { display: grid; width: 19px; height: 19px; place-items: center; color: #fff; font-size: 8px; font-style: normal; background: #7e9072; border-radius: 50%; }
+    .review-route-flow b { color: #ad9c77; font-size: 12px; font-weight: 500; }
+    .author-step-panel[hidden] { display: none !important; }
+    .author-step-panel:not([hidden]) { animation: author-step-in .22s ease both; }
+    @keyframes author-step-in { from { opacity: .55; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .field textarea.source-step-textarea { min-height: 252px; padding: 14px; font-size: 12px; line-height: 1.75; }
+    .source-field-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; color: var(--muted-soft); font-size: 9px; }
+    .source-field-meta span:last-child { color: #7b8974; font-weight: 700; }
+    .source-footer { margin-top: 18px; padding-top: 15px; border-top: 1px solid #efede5; }
+    .source-meter-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; color: var(--muted-soft); font-size: 9px; }
+    .source-meter-head strong { color: var(--ink-soft); font-size: 9px; font-weight: 750; }
+    .source-meter-head .over-limit { color: #a65344; }
+    .source-meter { height: 5px; overflow: hidden; background: #efeee6; border-radius: 10px; }
+    .source-meter span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, #6d9477, #c39b5f); border-radius: inherit; transition: width .18s ease, background-color .18s ease; }
+    .source-meter.over-limit span { background: #b35d4c; }
+    .source-save-note { display: block; margin-top: 8px; color: var(--muted-soft); font-size: 9px; line-height: 1.5; }
+    .wizard-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 15px; }
+    .wizard-actions .secondary-action, .wizard-actions .primary { min-height: 43px; padding: 10px 14px; }
+    .wizard-action-main { display: flex; justify-content: flex-end; }
+    .wizard-actions .primary { display: inline-flex; align-items: center; gap: 8px; }
+    .wizard-actions [hidden] { display: none !important; }
+    .source-chip[data-state="saving"] { color: #8b6d3d; background: #faf2df; border-color: #eee2c3; }
+    .source-chip[data-state="saved"] { color: #55735e; background: #edf3eb; border-color: #dce8d9; }
+    .source-chip[data-state="error"] { color: #945347; background: #fbefeb; border-color: #edd9d3; }
+    .source-chip[data-state="saved"] i { background: #66866b; }
+    .source-chip[data-state="saving"] i { background: #c69a53; }
+    .source-chip[data-state="error"] i { background: #b35d4c; }
+    .wizard-actions .primary svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .wizard-actions .primary:disabled { opacity: .62; cursor: progress; }
+    .step-error { min-height: 16px; margin: 8px 0 0; color: #9a5549; font-size: 9px; }
     .builder-grid { display: grid; grid-template-columns: minmax(340px, .92fr) minmax(440px, 1.08fr); align-items: start; gap: 18px; }
     .card { min-width: 0; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-sm); }
     .card-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px 16px; border-bottom: 1px solid #eeece4; }
@@ -845,9 +887,9 @@
       .thumb { height: 130px; }
       .builder-top { min-height: 62px; }
       .builder-body { padding-top: 23px; }
-      .steps { padding-right: 11px; padding-left: 11px; }
-      .step { gap: 6px; font-size: 9px; }
-      .step:after { margin: 0 7px; }
+      .steps { padding-right: 12px; padding-left: 12px; }
+      .review-route { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .review-route-flow { justify-content: flex-start; flex-wrap: wrap; }
       .empty { flex-wrap: wrap; }
       .empty .primary { margin-left: 92px; }
     }
@@ -896,10 +938,14 @@
       .builder-body { padding: 20px 12px 40px; }
       .builder-heading h1 { font-size: 27px; }
       .builder-heading p { font-size: 11px; }
-      .steps { gap: 5px; padding: 10px 9px; }
-      .step { flex-direction: column; align-items: flex-start; gap: 4px; font-size: 8px; white-space: normal; }
-      .step i { width: 21px; height: 21px; flex-basis: 21px; }
-      .step:after { align-self: center; width: 100%; flex: 0 1 auto; margin: 0 3px; }
+      .steps { grid-template-columns: repeat(6, minmax(66px, 1fr)); gap: 3px; padding: 11px 8px 9px; overflow-x: auto; scrollbar-width: thin; }
+      .steps-track { top: 25px; right: 37px; left: 37px; }
+      .step { gap: 6px; font-size: 8px; }
+      .step i { width: 25px; height: 25px; flex-basis: 25px; box-shadow: 0 0 0 4px #fffefa; }
+      .review-route-flow { gap: 7px; font-size: 8px; }
+      .review-route-flow span { gap: 4px; }
+      .field textarea.source-step-textarea { min-height: 218px; }
+      .wizard-actions .secondary-action, .wizard-actions .primary { min-height: 45px; }
       .builder-grid { gap: 13px; }
       .card-title { padding: 15px 14px 13px; }
       .card-title h2 { font-size: 19px; }
@@ -912,6 +958,12 @@
       .build-actions { align-items: stretch; flex-direction: column; }
       .build-actions > span { order: 1; }
       .build-actions .primary { width: 100%; order: 0; }
+      .wizard-actions { flex-wrap: wrap; }
+      .wizard-action-main { flex: 1 1 100%; }
+      .wizard-action-main .primary { width: 100%; justify-content: center; }
+      .wizard-actions .secondary-action { min-width: 91px; }
+      .wizard-actions #wizardStepCounter { margin-left: auto; }
+      .source-field-meta { align-items: flex-start; flex-direction: column; gap: 4px; }
       .deck-top { padding: 15px 13px 12px; }
       .deck-top h2 { max-width: 58vw; font-size: 18px; }
       .deck-top small { max-width: 58vw; font-size: 8px; }
@@ -1130,86 +1182,136 @@
     <div class="builder-body">
       <div class="builder-heading">
         <div class="kicker">INTERNAL LESSON AUTHORING</div>
-        <h1>Start with the source the team trusts.</h1>
-        <p>Set the course context and add approved source notes. AI may draft plain-language explanations; an independent reviewer must approve the shared lesson for internal use.</p>
+        <h1>Build a stronger lesson, one clear step at a time.</h1>
+        <p>Move from the topic brief to the explanation, formulas, example, memory cues, and solution steps. Every shared draft stays internal until a different reviewer approves it.</p>
       </div>
 
-      <div class="steps" aria-label="Lesson creation steps">
-        <div class="step active"><i>1</i><span>Lesson details</span></div>
-        <div class="step"><i>2</i><span>Scene structure</span></div>
-        <div class="step"><i>3</i><span>Preview</span></div>
+      <div class="review-route" aria-label="Internal quality and approval path">
+        <span class="review-route-label">HUMAN REVIEW GATE</span>
+        <div class="review-route-flow">
+          <span><i>1</i>Author draft</span><b aria-hidden="true">→</b>
+          <span><i>2</i>Independent reviewer</span><b aria-hidden="true">→</b>
+          <span><i>3</i>Internal approval</span>
+        </div>
+      </div>
+
+      <div class="steps" id="authoringStepper" role="group" aria-label="Six lesson authoring steps">
+        <div class="steps-track" aria-hidden="true"><span id="authoringProgress"></span></div>
+        <button class="step active" id="authorStepNav1" type="button" aria-label="Step 1: Topic brief" aria-current="step" onclick="goToAuthoringStep(0)"><i>01</i><span>Brief</span></button>
+        <button class="step" id="authorStepNav2" type="button" aria-label="Step 2: Explanation" disabled onclick="goToAuthoringStep(1)"><i>02</i><span>Explain</span></button>
+        <button class="step" id="authorStepNav3" type="button" aria-label="Step 3: Formulas and key terms" disabled onclick="goToAuthoringStep(2)"><i>03</i><span>Formula</span></button>
+        <button class="step" id="authorStepNav4" type="button" aria-label="Step 4: Worked examples" disabled onclick="goToAuthoringStep(3)"><i>04</i><span>Examples</span></button>
+        <button class="step" id="authorStepNav5" type="button" aria-label="Step 5: Tricks and shortcuts" disabled onclick="goToAuthoringStep(4)"><i>05</i><span>Memory</span></button>
+        <button class="step" id="authorStepNav6" type="button" aria-label="Step 6: How to solve" disabled onclick="goToAuthoringStep(5)"><i>06</i><span>Steps</span></button>
       </div>
 
       <div class="builder-grid">
-        <section class="card input-card" aria-labelledby="inputsHeading">
+        <section class="card input-card" aria-labelledby="authorStepTitle">
           <div class="card-title">
             <div>
-              <span class="section-marker">01 · YOUR COURSE CONTEXT</span>
-              <h2 id="inputsHeading">Lesson inputs</h2>
-              <p>Give your prepared notes a clear academic home.</p>
+              <span class="section-marker" id="authorStepKicker">01 · TOPIC BRIEF</span>
+              <h2 id="authorStepTitle" tabindex="-1">Set the lesson brief</h2>
+              <p id="authorStepDescription">Start with the course context and a concise description of what learners should understand.</p>
             </div>
-            <span class="source-chip"><i aria-hidden="true"></i>Text first</span>
+            <span class="source-chip" id="sourceSaveStatus" aria-live="polite"><i aria-hidden="true"></i>New draft</span>
           </div>
           <div class="card-content">
-            <div class="field-row">
-              <div class="field">
-                <label for="program">Program</label>
-                <select id="program" onchange="queueSave()">
-                  <option>B.Com</option>
-                  <option>B.Sc</option>
-                  <option>BBA</option>
-                  <option>BA</option>
-                  <option>B.E. / B.Tech</option>
-                  <option>Other degree program</option>
-                </select>
+            <section class="author-step-panel" id="authorStep1" aria-labelledby="authorStepTitle">
+              <div class="field-row">
+                <div class="field">
+                  <label for="program">Program</label>
+                  <select id="program" onchange="queueSave()">
+                    <option>B.Com</option>
+                    <option>B.Sc</option>
+                    <option>BBA</option>
+                    <option>BA</option>
+                    <option>B.E. / B.Tech</option>
+                    <option>Other degree program</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="branch">Branch / specialization</label>
+                  <input id="branch" placeholder="e.g. CSE, Finance, Physics" oninput="queueSave()">
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="subject">Subject</label>
+                  <input id="subject" placeholder="e.g. Data Structures" oninput="queueSave()">
+                </div>
+                <div class="field">
+                  <label for="module">Module / unit</label>
+                  <input id="module" placeholder="e.g. Module 2 · Trees and graphs" oninput="queueSave()">
+                </div>
               </div>
               <div class="field">
-                <label for="branch">Branch / specialization</label>
-                <input id="branch" placeholder="e.g. CSE, Finance, Physics" oninput="queueSave()">
+                <label for="topic">Lesson topic <span class="required-label">Required</span></label>
+                <input id="topic" placeholder="e.g. Price elasticity of demand" required oninput="queueSave()">
               </div>
+              <div class="field">
+                <label for="topicBriefNotes">Topic brief</label>
+                <textarea class="source-step-textarea" id="topicBriefNotes" rows="9" placeholder="Paste a short syllabus brief or describe the scope: what the lesson covers, why it matters, and what a learner should be able to do…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Use this as the lesson’s north star; detailed teaching notes come in the next steps.</span><span id="topicBriefCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep2" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="explanationNotes">Explanation / concept</label>
+                <textarea class="source-step-textarea" id="explanationNotes" rows="12" placeholder="Explain the idea in a clear sequence. Define unfamiliar words and connect the concept to something the learner already knows…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Keep one central idea in focus; the preview builds the concept scene from this section.</span><span id="explanationCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep3" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="formulaNotes">Formulas &amp; key terms</label>
+                <textarea class="source-step-textarea" id="formulaNotes" rows="12" placeholder="Add the formula, define every symbol, and note the conditions where it applies…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Include units, sign conventions, assumptions, or common notation.</span><span id="formulaCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep4" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="exampleNotes">Worked examples</label>
+                <textarea class="source-step-textarea" id="exampleNotes" rows="12" placeholder="Show one or more questions, the working, and each final answer. Explain why the steps are taken…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Keep the working visible so a reviewer can verify the method and answer.</span><span id="exampleCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep5" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="trickNotes">Tricks, shortcuts &amp; memory cues</label>
+                <textarea class="source-step-textarea" id="trickNotes" rows="12" placeholder="Add a useful mnemonic, pattern, shortcut, or common pitfall—and when it is safe to use…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Flag shortcuts that have exceptions or should not replace the full method.</span><span id="trickCount">0 chars</span></div>
+              </div>
+            </section>
+
+            <section class="author-step-panel" id="authorStep6" aria-labelledby="authorStepTitle" hidden>
+              <div class="field">
+                <label for="solveNotes">How to solve / steps</label>
+                <textarea class="source-step-textarea" id="solveNotes" rows="12" placeholder="Write the method in order: what to identify, which relationship to use, how to calculate, and how to check the answer…" oninput="updateSourceCounters();queueSave()"></textarea>
+                <div class="source-field-meta"><span>Use numbered actions learners can follow independently.</span><span id="solveCount">0 chars</span></div>
+              </div>
+              <div class="template-lock">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                <span>The seven-scene sequence stays consistent. You can review every scene before submitting the draft for independent approval.</span>
+              </div>
+            </section>
+
+            <div class="source-footer">
+              <div class="source-meter-head"><strong>Source material</strong><span id="sourceTotalCount" aria-live="polite">0 / 24,000 characters</span></div>
+              <div class="source-meter" id="sourceMeter" role="progressbar" aria-label="Source material character limit" aria-valuemin="0" aria-valuemax="24000" aria-valuenow="0"><span id="sourceMeterFill"></span></div>
+              <small class="source-save-note" id="buildHint">New lesson content is saved to the shared queue when you finish the steps.</small>
             </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="subject">Subject</label>
-                <input id="subject" placeholder="e.g. Data Structures" oninput="queueSave()">
+            <p class="step-error" id="authoringStepError" aria-live="polite"></p>
+            <div class="wizard-actions">
+              <button class="secondary-action" id="authorStepPrev" type="button" onclick="goToAuthoringStep(authoringStep-1)" hidden>← Back</button>
+              <span id="wizardStepCounter" class="source-save-note">Step 1 of 6</span>
+              <div class="wizard-action-main">
+                <button class="primary" id="authorStepNext" type="button" onclick="goToAuthoringStep(authoringStep+1)">Next: Explanation <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                <button class="primary" id="createLessonButton" type="button" onclick="generateDeck()" hidden>Create draft &amp; build preview <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
               </div>
-              <div class="field">
-                <label for="module">Module / unit</label>
-                <input id="module" placeholder="e.g. Module 2 · Trees and graphs" oninput="queueSave()">
-              </div>
-            </div>
-            <div class="field">
-              <label for="topic">Lesson topic <span class="required-label">Required</span></label>
-              <input id="topic" placeholder="e.g. Binary search trees" required oninput="queueSave()">
-            </div>
-            <div class="field-row source-field-row">
-              <div class="field">
-                <label for="explanationNotes">1. Explanation / concept</label>
-                <textarea id="explanationNotes" placeholder="Explain the idea, definition, or concept in your own words…" oninput="queueSave()"></textarea>
-              </div>
-              <div class="field">
-                <label for="formulaNotes">2. Formulas &amp; key terms</label>
-                <textarea id="formulaNotes" placeholder="Add formulas, symbols, definitions, and what each term means…" oninput="queueSave()"></textarea>
-              </div>
-            </div>
-            <div class="field-row source-field-row">
-              <div class="field">
-                <label for="trickNotes">3. Tricks / memory cues</label>
-                <textarea id="trickNotes" placeholder="Add shortcuts, patterns, mnemonics, or common pitfalls…" oninput="queueSave()"></textarea>
-              </div>
-              <div class="field">
-                <label for="solveNotes">4. How to solve / steps</label>
-                <textarea id="solveNotes" placeholder="Write the method in order: what to identify, which formula to use, and how to check the answer…" oninput="queueSave()"></textarea>
-              </div>
-            </div>
-            <div class="helper source-helper">Fill in one or more sections. Older drafts are sorted into these fields when opened; the original note content is kept when saved.</div>
-            <div class="template-lock">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-              <span>The seven-slide lesson flow stays fixed. Choose a visual theme and transition in the preview; your notes remain the source of truth.</span>
-            </div>
-            <div class="build-actions">
-              <span id="buildHint">Your prepared content stays yours.</span>
-              <button class="primary" type="button" onclick="generateDeck()">Arrange into lesson slides <span aria-hidden="true">→</span></button>
             </div>
           </div>
         </section>
@@ -1228,7 +1330,7 @@
             <div class="stage-content" id="stageContent">
               <div class="slide-kicker">YOUR LESSON PREVIEW</div>
               <h2>One clear idea at a time.</h2>
-              <p>Fill in your topic and prepared notes, then arrange them into a standard lesson sequence.</p>
+              <p>Start with the topic brief, move through each source section, then build a review-ready lesson.</p>
               <div class="number">01</div>
             </div>
           </div>
@@ -1302,23 +1404,6 @@
             <button class="slide-mini" type="button" disabled>Memory cue</button>
             <button class="slide-mini" type="button" disabled>Recap</button>
           </div>
-          <section class="animation-maker" aria-labelledby="animationHeading">
-            <div class="animation-maker-head">
-              <span class="animation-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span>
-              <span><strong id="animationHeading">Animate the explanation</strong><p>Gemini can turn your notes into a plain-language story, then our own vector scenes bring each idea to life.</p></span>
-            </div>
-            <label class="ai-consent" for="aiConsent"><input id="aiConsent" type="checkbox"><span>I agree to send this lesson’s notes to Google Gemini to create simplified explanations and an animated storyboard.</span></label>
-            <div class="animation-actions">
-              <button class="primary" id="animateButton" type="button" onclick="generateAnimatedLesson()" disabled>
-                Create animated explanation <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>
-              </button>
-              <button class="secondary-action" id="exportVideoButton" type="button" onclick="downloadAnimatedVideo()" disabled>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>Export animated video
-              </button>
-            </div>
-            <small class="animation-status" id="animationStatus" aria-live="polite">First arrange and save your lesson notes. AI output should be reviewed before teaching.</small>
-            <small class="animation-export-note">Notes are sent to Gemini only when you consent and generate. WebM export includes animated visuals and captions; browser narration plays in the preview but is not embedded in the export yet.</small>
-          </section>
           <section class="workflow-card" aria-labelledby="workflowHeading">
             <div class="workflow-head">
               <div>
@@ -1342,6 +1427,24 @@
             </div>
             <small class="workflow-hint">Approved lessons remain inside this internal prototype. No customer-facing publish route is enabled.</small>
           </section>
+          <section class="animation-maker" aria-labelledby="animationHeading">
+            <div class="animation-maker-head">
+              <span class="animation-spark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span>
+              <span><strong id="animationHeading">Animate the explanation</strong><p>Gemini can turn your notes into a plain-language story, then our own vector scenes bring each idea to life.</p></span>
+            </div>
+            <label class="ai-consent" for="aiConsent"><input id="aiConsent" type="checkbox"><span>I agree to send this lesson’s notes to Google Gemini to create simplified explanations and an animated storyboard.</span></label>
+            <div class="animation-actions">
+              <button class="primary" id="animateButton" type="button" onclick="generateAnimatedLesson()" disabled>
+                Create animated explanation <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>
+              </button>
+              <button class="secondary-action" id="exportVideoButton" type="button" onclick="downloadAnimatedVideo()" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></svg>Export animated video
+              </button>
+            </div>
+            <small class="animation-status" id="animationStatus" aria-live="polite">First arrange and save your lesson notes. AI output should be reviewed before teaching.</small>
+            <small class="animation-export-note">Notes are sent to Gemini only when you consent and generate. WebM export includes animated visuals and captions; browser narration plays in the preview but is not embedded in the export yet.</small>
+          </section>
+
           <div class="script-list" id="scriptList">
             <div class="empty-script">Arrange your notes first. Then edit the slide headings and narration text here.</div>
           </div>

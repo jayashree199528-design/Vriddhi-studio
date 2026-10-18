@@ -11,7 +11,19 @@ function readStoredPreference(key, allowedValues, fallback) {
 function savePreference(key, value) {
   try { window.localStorage.setItem(key, String(value)); } catch (_) {}
 }
-let lessons=[],deck=[],slide=0,playbackState='stopped',playTimer=null,playTimerPending=false,playTimerDeadline=0,playTimerRemaining=0,playTimerKind=null,playbackToken=0,activeUtterance=null,currentId=null,currentScope='shared',currentRole=null,sharedQueueReady=false,workspaceError='',saveTimer=null,editorRevision=0,editorDirty=false,activeSave=null,currentUser=null,db=null,auth=null,functionsClient=null,sceneAnimationFrame=null,sceneAnimationToken=0,sceneAnimationStartedAt=0,sceneAnimationElapsed=0,sceneAnimationPaused=false,animationRequestActive=false,workflowActionActive=false;
+let lessons=[],deck=[],slide=0,playbackState='stopped',playTimer=null,playTimerPending=false,playTimerDeadline=0,playTimerRemaining=0,playTimerKind=null,playbackToken=0,activeUtterance=null,currentId=null,currentScope='shared',currentRole=null,sharedQueueReady=false,workspaceError='',saveTimer=null,editorRevision=0,editorDirty=false,activeSave=null,currentUser=null,db=null,auth=null,functionsClient=null,sceneAnimationFrame=null,sceneAnimationToken=0,sceneAnimationStartedAt=0,sceneAnimationElapsed=0,sceneAnimationPaused=false,animationRequestActive=false,workflowActionActive=false,authoringStep=0;
+const SOURCE_LIMIT=24000;
+const AUTOSAVE_DELAY_MS=1100;
+const SOURCE_FIELD_IDS=['topicBriefNotes','explanationNotes','formulaNotes','exampleNotes','trickNotes','solveNotes'];
+const SOURCE_COUNT_IDS={topicBriefNotes:'topicBriefCount',explanationNotes:'explanationCount',formulaNotes:'formulaCount',exampleNotes:'exampleCount',trickNotes:'trickCount',solveNotes:'solveCount'};
+const AUTHORING_STEPS=[
+  {label:'Topic brief',kicker:'01 · TOPIC BRIEF',title:'Set the lesson brief',description:'Start with the course context and a concise description of what learners should understand.',fieldId:'topicBriefNotes'},
+  {label:'Explanation',kicker:'02 · EXPLANATION',title:'Explain the central idea',description:'Build the concept in a clear sequence, defining unfamiliar terms as you go.',fieldId:'explanationNotes'},
+  {label:'Formulas & key terms',kicker:'03 · FORMULAS & KEY TERMS',title:'Make the notation precise',description:'Capture formulas, symbols, units, definitions, and the conditions where they apply.',fieldId:'formulaNotes'},
+  {label:'Worked examples',kicker:'04 · WORKED EXAMPLES',title:'Show the method in action',description:'Give learners one or more worked examples they can follow and reviewers can verify.',fieldId:'exampleNotes'},
+  {label:'Tricks & shortcuts',kicker:'05 · TRICKS & SHORTCUTS',title:'Add a memorable cue',description:'Share useful patterns and mnemonics, including any limits or common pitfalls.',fieldId:'trickNotes'},
+  {label:'How to solve',kicker:'06 · HOW TO SOLVE',title:'Turn the method into steps',description:'Finish with an ordered method learners can apply independently.',fieldId:'solveNotes'},
+];
 let transitionPauseMs=Number(readStoredPreference('vriddhi-playback-pause',['0','2000','4000','6000'],'2000'));
 let currentTemplate=readStoredPreference('vriddhi-template',['campus','notebook','midnight'],'campus');
 let voicePreference=readStoredPreference('vriddhi-voice',['auto','female','male'],'auto');
@@ -29,6 +41,69 @@ function roleCanAuthor(){return currentRole==='author'||currentRole==='owner'}
 function roleCanReview(){return currentRole==='reviewer'||currentRole==='owner'}
 function canUseSharedQueue(){return roleCanAuthor()&&sharedQueueReady}
 function isRoleAssignmentError(){return workspaceError==='functions/permission-denied'||workspaceError==='permission-denied'}
+function setDraftSaveStatus(message,state='info'){
+  const status=document.getElementById('sourceSaveStatus');
+  if(!status)return;
+  status.dataset.state=state;
+  status.innerHTML=`<i aria-hidden="true"></i>${esc(message)}`;
+}
+function updateSourceCounters(){
+  for(const id of SOURCE_FIELD_IDS){
+    const field=document.getElementById(id),count=document.getElementById(SOURCE_COUNT_IDS[id]);
+    const length=field?.value?.length||0;
+    if(count)count.textContent=`${length.toLocaleString()} chars`;
+  }
+  const payloadLength=lessonFormPayload().source.length,total=document.getElementById('sourceTotalCount'),meter=document.getElementById('sourceMeter'),fill=document.getElementById('sourceMeterFill');
+  const overLimit=payloadLength>SOURCE_LIMIT;
+  if(total){total.textContent=`${payloadLength.toLocaleString()} / ${SOURCE_LIMIT.toLocaleString()} characters`;total.classList.toggle('over-limit',overLimit)}
+  if(meter){meter.classList.toggle('over-limit',overLimit);meter.setAttribute('aria-valuenow',String(Math.min(payloadLength,SOURCE_LIMIT)))}
+  if(fill)fill.style.width=`${Math.min(100,payloadLength/SOURCE_LIMIT*100)}%`;
+  return {payloadLength,overLimit};
+}
+function renderAuthoringStep(){
+  const step=AUTHORING_STEPS[authoringStep]||AUTHORING_STEPS[0],lastIndex=AUTHORING_STEPS.length-1;
+  for(let index=0;index<AUTHORING_STEPS.length;index++){
+    const panel=document.getElementById(`authorStep${index+1}`),nav=document.getElementById(`authorStepNav${index+1}`);
+    if(panel)panel.hidden=index!==authoringStep;
+    if(nav){nav.disabled=index>authoringStep;nav.classList.toggle('active',index===authoringStep);nav.classList.toggle('complete',index<authoringStep);nav.setAttribute('aria-current',index===authoringStep?'step':'false')}
+  }
+  const kicker=document.getElementById('authorStepKicker'),title=document.getElementById('authorStepTitle'),description=document.getElementById('authorStepDescription'),counter=document.getElementById('wizardStepCounter'),progress=document.getElementById('authoringProgress');
+  if(kicker)kicker.textContent=step.kicker;
+  if(title)title.textContent=step.title;
+  if(description)description.textContent=step.description;
+  if(counter)counter.textContent=`Step ${authoringStep+1} of ${AUTHORING_STEPS.length}`;
+  if(progress)progress.style.width=`${authoringStep/(lastIndex||1)*100}%`;
+  const previous=document.getElementById('authorStepPrev'),next=document.getElementById('authorStepNext'),create=document.getElementById('createLessonButton');
+  if(previous)previous.hidden=authoringStep===0;
+  if(next){next.hidden=authoringStep===lastIndex;next.innerHTML=authoringStep<lastIndex?`Next: ${esc(AUTHORING_STEPS[authoringStep+1].label)} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>`:'Next'}
+  const mayCreateOrBuild=canUseSharedQueue()&&(!currentId||currentScope==='private'||canEditCurrentLesson());
+  if(create)create.hidden=authoringStep!==lastIndex||!mayCreateOrBuild;
+  const error=document.getElementById('authoringStepError');if(error)error.textContent='';
+}
+function validateAuthoringStep(step){
+  if(step!==0)return true;
+  if(!document.getElementById('topic').value.trim()){
+    const message='Add a lesson topic before moving to the next step.';
+    const error=document.getElementById('authoringStepError');if(error)error.textContent=message;
+    toast(message);document.getElementById('topic').focus();return false;
+  }
+  const hasBrief=document.getElementById('topicBriefNotes').value.trim().length>0;
+  const isExistingLegacyDraft=Boolean(currentId&&lessonFormPayload().source.length>=20);
+  if(!hasBrief&&!isExistingLegacyDraft){
+    const message='Add a short topic brief before continuing to the explanation.';
+    const error=document.getElementById('authoringStepError');if(error)error.textContent=message;
+    toast(message);document.getElementById('topicBriefNotes').focus();return false;
+  }
+  return true;
+}
+function goToAuthoringStep(target){
+  const next=Number(target);
+  if(!Number.isInteger(next)||next<0||next>=AUTHORING_STEPS.length||next>authoringStep+1)return false;
+  if(next>authoringStep&&!validateAuthoringStep(authoringStep))return false;
+  const previous=authoringStep;authoringStep=next;renderAuthoringStep();
+  if(next>previous){const field=document.getElementById(AUTHORING_STEPS[next].fieldId);if(field)field.focus()}
+  return true;
+}
 function canEditCurrentLesson(){
   if(currentScope==='private')return Boolean(currentUser&&currentId);
   const lesson=lessons.find(item=>item.id===currentId&&item._scope==='internal');
@@ -104,11 +179,12 @@ function updateWorkflowControls(){
   }
   const reviewerNote=document.getElementById('internalReviewSummary');
   if(reviewerNote){reviewerNote.disabled=!mayReview;if(mayReview&&document.activeElement!==reviewerNote)reviewerNote.value=lesson.reviewSummary||'';}
-  for(const id of ['program','branch','subject','module','topic','explanationNotes','formulaNotes','trickNotes','solveNotes']){
+  for(const id of ['program','branch','subject','module','topic',...SOURCE_FIELD_IDS]){
     const field=document.getElementById(id);if(field)field.disabled=!controlsEditable;
   }
-  const buildButton=document.getElementById('buildLessonButton');
-  if(buildButton)buildButton.hidden=!canUseSharedQueue();
+  const buildButton=document.getElementById('createLessonButton');
+  const mayCreateOrBuild=canUseSharedQueue()&&(!currentId||currentScope==='private'||canEditCurrentLesson());
+  if(buildButton)buildButton.hidden=authoringStep!==AUTHORING_STEPS.length-1||!mayCreateOrBuild;
   const draftScopeLabel=document.getElementById('draftScopeLabel');
   if(draftScopeLabel)draftScopeLabel.textContent=privateDraft?'Private legacy draft · copy to team queue':currentScope==='internal'&&currentId?'Shared team draft · internal review only':'Shared team draft · not published to customers';
   const scriptToggle=document.getElementById('scriptToggle');
@@ -127,7 +203,9 @@ function syncScriptEditability(){
 function resetForm(){
 
   document.getElementById('program').value='B.Com';
-  for(const id of ['branch','subject','module','topic','explanationNotes','formulaNotes','trickNotes','solveNotes'])document.getElementById(id).value='';
+  for(const id of ['branch','subject','module','topic',...SOURCE_FIELD_IDS])document.getElementById(id).value='';
+  authoringStep=0;renderAuthoringStep();updateSourceCounters();
+  setDraftSaveStatus('New draft · saved when created','info');
   document.getElementById('deckTitle').textContent='Lesson preview';
   document.getElementById('deckSub').textContent='Your seven-slide sequence appears here.';
   document.getElementById('slideIndex').textContent='No slides yet';
@@ -135,7 +213,7 @@ function resetForm(){
   document.getElementById('stage').style.background='';
   document.getElementById('stage').style.color='';
   document.getElementById('stage').dataset.template=currentTemplate;
-  document.getElementById('stageContent').innerHTML='<div class="slide-kicker">YOUR LESSON PREVIEW</div><h2>One clear idea at a time.</h2><p>Fill in your topic and prepared notes, then arrange them into a standard lesson sequence.</p><div class="number">01</div>';
+  document.getElementById('stageContent').innerHTML='<div class="slide-kicker">YOUR LESSON PREVIEW</div><h2>One clear idea at a time.</h2><p>Start with the topic brief, move through each source section, then build a review-ready lesson.</p><div class="number">01</div>';
   document.getElementById('slideStrip').innerHTML='<button class="slide-mini" type="button" disabled>Title</button><button class="slide-mini" type="button" disabled>Core idea</button><button class="slide-mini" type="button" disabled>Steps</button><button class="slide-mini" type="button" disabled>Formula</button><button class="slide-mini" type="button" disabled>Example</button><button class="slide-mini" type="button" disabled>Memory cue</button><button class="slide-mini" type="button" disabled>Recap</button>';
   document.getElementById('scriptList').classList.remove('open');
   document.getElementById('scriptList').innerHTML='<div class="empty-script">Arrange your notes first. Then edit the slide headings and narration text here.</div>';
@@ -176,6 +254,8 @@ async function openLesson(id){
   document.getElementById('module').value=lesson.module||'';
   document.getElementById('topic').value=lesson.topic||'';
   populateSourceFields(lesson.source||'');
+  authoringStep=0;renderAuthoringStep();updateSourceCounters();
+  setDraftSaveStatus('Loaded · no pending changes','saved');
   document.getElementById('deckTitle').textContent=lesson.topic||'Lesson preview';
   document.getElementById('deckSub').textContent=[lesson.program,lesson.branch,lesson.subject,lesson.module].filter(Boolean).join(' · ');
   document.getElementById('buildHint').textContent=currentScope==='internal'?'Shared internal draft · edits are role-controlled':'Private legacy draft · this copy stays in your account';
@@ -189,41 +269,99 @@ async function openLesson(id){
   document.body.style.overflow='hidden';
   renderDeck();updateWorkflowControls();
 }
-function splitSource(text){const sections={concept:[],formula:[],example:[],trick:[],steps:[],other:[]};const labels={concept:/^(concept|explanations?|overview|definition|meaning)\s*:?\s*/i,formula:/^(formulas?|equations?|key terms?|important terms?)\s*:?\s*/i,example:/^(worked example|examples?|application|problem)\s*:?\s*/i,trick:/^(tricks?|shortcuts?|memory tricks?|mnemonics?|tips?)\s*:?\s*/i,steps:/^(steps?|process|procedure|how it works|how to solve)\s*:?\s*/i};let active='other';for(let line of String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean)){for(const k in labels){if(labels[k].test(line)){active=k;line=line.replace(labels[k],'').trim();break}}if(line)sections[active].push(line)}return sections}
+function splitSource(text){
+  const sections={brief:[],concept:[],formula:[],example:[],trick:[],steps:[],other:[]};
+  const labels={
+    brief:/^(topic brief|lesson brief|learning objectives?|objectives?)\s*:?\s*/i,
+    concept:/^(concept(?:\s*\/\s*explanations?)?|explanations?|overview|definition|meaning)\s*:?\s*/i,
+    formula:/^(formulas?(?:\s*\/\s*(?:key terms?|important terms?))?|equations?|key terms?|important terms?)\s*:?\s*/i,
+    example:/^(worked examples?|examples?|application|problem)\s*:?\s*/i,
+    trick:/^(tricks?(?:\s*\/\s*(?:shortcuts?|memory cues?))?|shortcuts?|memory cues?|memory tricks?|mnemonics?|tips?)\s*:?\s*/i,
+    steps:/^(steps?|process|procedure|how it works|how to solve)\s*:?\s*/i,
+  };
+  let active='other';
+  for(let line of String(text||'').split(/\r?\n/).map(value=>value.trim()).filter(Boolean)){
+    for(const key in labels){if(labels[key].test(line)){active=key;line=line.replace(labels[key],'').trim();break}}
+    if(line)sections[active].push(line);
+  }
+  return sections;
+}
 function populateSourceFields(source){
   const sections=splitSource(source);
+  document.getElementById('topicBriefNotes').value=sections.brief.join('\n\n');
   document.getElementById('explanationNotes').value=[...sections.concept,...sections.other].join('\n\n');
   document.getElementById('formulaNotes').value=sections.formula.join('\n\n');
+  document.getElementById('exampleNotes').value=sections.example.join('\n\n');
   document.getElementById('trickNotes').value=sections.trick.join('\n\n');
-  document.getElementById('solveNotes').value=[...sections.steps,...sections.example].join('\n\n');
+  document.getElementById('solveNotes').value=sections.steps.join('\n\n');
 }
 function getSentences(text){return (String(text||'').replace(/\s+/g,' ').match(/[^.!?]+[.!?]?/g)||[]).map(x=>x.trim()).filter(Boolean)}function summary(parts,n=3){return getSentences(parts.join(' ')).slice(0,n).join(' ').trim()}
-function createSlides(data){const s=splitSource(data.source),concept=summary(s.concept.length?s.concept:s.other.length?s.other:s.steps,3)||data.source.slice(0,420),sentences=getSentences(data.source),steps=(s.steps.length?s.steps:sentences.slice(1,5)).slice(0,4),formula=summary(s.formula,5)||'No formula or key terms were supplied in the source notes.',example=summary(s.example,5)||'No worked example was supplied in the source notes.',trick=summary(s.trick,4)||'No shortcut or memory cue was supplied in the source notes.',recap=summary([...s.concept,...s.formula,...s.trick,...s.other],2)||concept,course=data.program+(data.branch?' · '+data.branch:'');return [{kind:'intro',kicker:course,title:data.topic,body:[data.subject,data.module].filter(Boolean).join('  ·  ')||'A focused concept lesson',steps:[]},{kind:'concept',kicker:'THE CORE IDEA',title:'Start with the main idea',body:concept,steps:[]},{kind:'steps',kicker:'BREAK IT DOWN',title:'How it works',body:'Follow the explanation one step at a time.',steps},{kind:'formula',kicker:'FORMULA & KEY TERMS',title:'Keep this close',body:formula,steps:[]},{kind:'example',kicker:'APPLY THE IDEA',title:'A worked example',body:example,steps:[]},{kind:'trick',kicker:'REMEMBER IT',title:'Shortcut or memory cue',body:trick,steps:[]},{kind:'recap',kicker:'QUICK RECAP',title:'What to remember',body:recap,steps:[]}]}
+function createSlides(data){
+  const source=splitSource(data.source);
+  const concept=summary(source.concept.length?source.concept:source.brief.length?source.brief:source.other.length?source.other:source.steps,3)||data.source.slice(0,420);
+  const steps=(source.steps.length?source.steps:getSentences(source.concept.join(' '))).slice(0,4);
+  const formula=summary(source.formula,5)||'No formula or key terms were supplied in the source notes.';
+  const example=summary(source.example,5)||'No worked example was supplied in the source notes.';
+  const trick=summary(source.trick,4)||'No shortcut or memory cue was supplied in the source notes.';
+  const recap=summary([...source.brief,...source.concept,...source.formula,...source.example,...source.trick,...source.steps,...source.other],2)||concept;
+  const course=data.program+(data.branch?' · '+data.branch:'');
+  return [
+    {kind:'intro',kicker:course,title:data.topic,body:summary(source.brief,2)||[data.subject,data.module].filter(Boolean).join('  ·  ')||'A focused concept lesson',steps:[]},
+    {kind:'concept',kicker:'THE CORE IDEA',title:'Start with the main idea',body:concept,steps:[]},
+    {kind:'steps',kicker:'BREAK IT DOWN',title:'How it works',body:'Follow the explanation one step at a time.',steps},
+    {kind:'formula',kicker:'FORMULA & KEY TERMS',title:'Keep this close',body:formula,steps:[]},
+    {kind:'example',kicker:'APPLY THE IDEA',title:'A worked example',body:example,steps:[]},
+    {kind:'trick',kicker:'REMEMBER IT',title:'Shortcut or memory cue',body:trick,steps:[]},
+    {kind:'recap',kicker:'QUICK RECAP',title:'What to remember',body:recap,steps:[]},
+  ];
+}
 async function generateDeck(){
-  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before arranging another lesson.');return}
-  const payload=lessonFormPayload();
+  if(animationRequestActive||workflowActionActive){toast('Wait for the current action to finish before building this lesson.');return}
+  const payload=lessonFormPayload(),sourceLength=payload.source.length;
   if(!canUseSharedQueue()){toast('The shared internal queue is unavailable or your role cannot author drafts.');return}
   if(!functionsClient){toast('The internal lesson service is not deployed yet.');return}
-  if(!payload.topic){toast('Add a topic title first.');document.getElementById('topic').focus();return}
-  if(payload.source.length<20){toast('Paste your prepared notes (at least a few sentences).');document.getElementById('explanationNotes').focus();return}
-  stopPlay();stopSceneAnimation();
-  const btn=document.querySelector('.build-actions .primary');btn.disabled=true;btn.innerHTML='Arranging slides…';
+  if(!payload.topic){toast('Add a lesson topic on the first step.');goToAuthoringStep(0);document.getElementById('topic').focus();return}
+  if(sourceLength<20){toast('Add a topic brief or a few sentences of source material before creating the draft.');const firstFilled=SOURCE_FIELD_IDS.find(id=>document.getElementById(id).value.trim());const fieldId=firstFilled||'topicBriefNotes';const step=AUTHORING_STEPS.findIndex(item=>item.fieldId===fieldId);goToAuthoringStep(Math.max(0,step));document.getElementById(fieldId).focus();return}
+  if(sourceLength>SOURCE_LIMIT){updateSourceCounters();toast(`Source material is ${sourceLength.toLocaleString()} characters. Keep it within ${SOURCE_LIMIT.toLocaleString()} characters to create the draft.`);return}
+  stopPlay();stopSceneAnimation();cancelScheduledSave();workflowActionActive=true;updateWorkflowControls();
+  const btn=document.getElementById('createLessonButton');
+  if(btn){btn.disabled=true;btn.innerHTML='Building your lesson…'}
+  setDraftSaveStatus('Preparing lesson…','saving');
   try{
+    if(activeSave)await activeSave;
     const slides=createSlides(payload);
-    const response=await functionsClient.httpsCallable('createInternalLesson')({...payload,slides});
-    const id=response.data.id,now=new Date();
-    editorRevision++;editorDirty=false;currentId=id;currentScope='internal';deck=slides;slide=0;
-    const local={...payload,slides,id,status:'draft',createdByUid:currentUser.uid,authorEmail:currentUser.email||'',_scope:'internal',date:now.toLocaleDateString('en-IN',{day:'numeric',month:'short'}),_updatedMillis:now.getTime()};
-    lessons.unshift(local);renderLessons();
-    document.getElementById('buildHint').textContent='Shared draft saved to the internal review queue';
+    let id,status='draft';
+    const existingShared=currentScope==='internal'&&Boolean(currentId);
+    if(existingShared){
+      id=currentId;
+      const response=await functionsClient.httpsCallable('saveInternalLesson')({...payload,id,slides});
+      status=response.data.status||lessons.find(item=>item.id===id&&item._scope==='internal')?.status||'draft';
+    }else{
+      const response=await functionsClient.httpsCallable('createInternalLesson')({...payload,slides});
+      id=response.data.id;
+    }
+    const now=new Date();editorRevision++;editorDirty=false;currentId=id;currentScope='internal';deck=slides;slide=0;
+    let local=lessons.find(item=>item.id===id&&item._scope==='internal');
+    if(local){Object.assign(local,payload,{slides,status,_updatedMillis:now.getTime()})}
+    else{local={...payload,slides,id,status,createdByUid:currentUser.uid,authorEmail:currentUser.email||'',_scope:'internal',date:now.toLocaleDateString('en-IN',{day:'numeric',month:'short'}),_updatedMillis:now.getTime()};lessons.unshift(local)}
+    renderLessons();
+    document.getElementById('buildHint').textContent='Saved to the shared review queue. Your author draft is ready for an independent reviewer.';
+    setDraftSaveStatus('Saved to shared queue','saved');
     document.getElementById('deckTitle').textContent=payload.topic;
     document.getElementById('deckSub').textContent=[payload.program,payload.branch,payload.subject,payload.module].filter(Boolean).join(' · ');
     document.getElementById('scriptList').classList.remove('open');document.getElementById('scriptToggle').textContent='Edit script';
-    setAnimationStatus('Shared draft saved. Confirm Gemini consent when you want the animated explanation.');
-    renderDeck();updateWorkflowControls();
-    toast('Shared internal draft created. Review it, then submit it for independent approval.');
-  }catch(e){console.error('Internal lesson creation failed:',e.code||'unknown');toast(e.message||'Could not create the internal lesson draft.')}
-  finally{btn.disabled=false;btn.innerHTML='Arrange into lesson slides <span>→</span>'}
+    setAnimationStatus('Draft saved. Review the slides, then submit it for independent approval. Gemini animation is optional.');
+    renderDeck();updateSourceCounters();updateWorkflowControls();
+    toast(existingShared?'Lesson draft updated. Review it, then submit it for independent approval.':'Shared internal draft created. Review it, then submit it for independent approval.');
+  }catch(error){
+    console.error('Internal lesson creation or update failed:',error.code||'unknown');
+    setDraftSaveStatus('Not saved · retry when ready','error');
+    toast(error.message||'Could not save the internal lesson draft. Your entered content remains in the editor.');
+  }finally{
+    workflowActionActive=false;
+    if(btn){btn.disabled=false;btn.innerHTML='Create draft &amp; build preview <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>'}
+    updateWorkflowControls();
+  }
 }
 async function sharePrivateDraft(){
   if(currentScope!=='private'||!currentId||!deck.length){toast('Open one of your existing private drafts first.');return}
@@ -444,8 +582,10 @@ function drawVideoFrame(ctx,width,height,scene,index,time,palette){
 }
 function lessonFormPayload(){
   const sourceSections=[
+    ['TOPIC BRIEF',document.getElementById('topicBriefNotes').value.trim()],
     ['EXPLANATION',document.getElementById('explanationNotes').value.trim()],
     ['FORMULA',document.getElementById('formulaNotes').value.trim()],
+    ['WORKED EXAMPLE',document.getElementById('exampleNotes').value.trim()],
     ['TRICK',document.getElementById('trickNotes').value.trim()],
     ['STEPS',document.getElementById('solveNotes').value.trim()],
   ];
@@ -460,13 +600,17 @@ async function generateAnimatedLesson(){
   if(!currentUser||!functionsClient){toast('The internal Firebase Functions service is not available yet.');return}
   if(!roleCanAuthor()||!canEditCurrentLesson()||workflowActionActive){toast('Only the draft author or an owner can generate this explanation.');return}
   if(animationRequestActive){toast('An animated explanation is already being generated.');return}
-  const payload=lessonFormPayload(),button=document.getElementById('animateButton');
-  if(payload.source.length<20){toast('Add a few sentences of prepared notes first.');document.getElementById('explanationNotes').focus();return}
+  const payload=lessonFormPayload(),button=document.getElementById('animateButton'),sourceLength=payload.source.length;
+  if(sourceLength<20){toast('Add a topic brief or a few sentences of prepared notes first.');const firstFilled=SOURCE_FIELD_IDS.find(id=>document.getElementById(id).value.trim())||'topicBriefNotes';const step=AUTHORING_STEPS.findIndex(item=>item.fieldId===firstFilled);goToAuthoringStep(Math.max(0,step));document.getElementById(firstFilled).focus();return}
+  if(sourceLength>SOURCE_LIMIT){updateSourceCounters();toast(`Source material is over the ${SOURCE_LIMIT.toLocaleString()} character limit. Shorten it before generating.`);return}
   const targetId=currentId,targetScope=currentScope,targetUid=currentUser.uid,baseDeck=JSON.parse(JSON.stringify(deck));
   animationRequestActive=true;updateWorkflowControls();button.disabled=true;button.textContent='Building your animated explanation…';
-  setAnimationStatus('Gemini is shaping your notes into a simple story and scene plan. This can take a little while.');
+  setDraftSaveStatus('Saving source before AI generation…','saving');
+  setAnimationStatus(sourceLength>=12000?`Gemini is preparing a large structured source (${sourceLength.toLocaleString()} characters). This can take longer; the draft stays open while it runs.`:'Gemini is shaping your source into a simple story and scene plan. This can take a little while.');
+  let sourceSaved=false;
   try{
-    await flushCurrentSave();
+    await flushCurrentSave();sourceSaved=true;
+    setAnimationStatus('Source saved. Sending the six-part brief to Gemini and building the storyboard…');
     const response=await functionsClient.httpsCallable('generateAnimatedLesson')(payload);
     const animatedDeck=mergeStoryboard(baseDeck,response.data);
     const savePayload={...payload,id:targetId,slides:animatedDeck,animationProvider:'gemini',animatedStoryboardVersion:1};
@@ -484,6 +628,7 @@ async function generateAnimatedLesson(){
       document.getElementById('deckTitle').textContent=response.data.title||payload.topic;
       document.getElementById('deckSub').textContent=[payload.program,payload.branch,payload.subject,payload.module].filter(Boolean).join(' · ');
       document.getElementById('buildHint').textContent=targetScope==='internal'?'Animated storyboard saved to the shared internal draft':'Animated storyboard saved to your private draft';
+      setDraftSaveStatus('Animated storyboard saved','saved');
       consent.checked=false;
       renderDeck();updateWorkflowControls();
       setAnimationStatus('Your seven-scene explainer is ready. Review every explanation, formula and example, then send it to a different reviewer.');
@@ -492,7 +637,7 @@ async function generateAnimatedLesson(){
   }catch(error){
     console.error('Animated lesson request failed:',error.code||'unknown');
     const message=error&&error.message?error.message:'Could not create the animated explanation.';
-    if(currentId===targetId&&currentScope===targetScope)setAnimationStatus(message);
+    if(currentId===targetId&&currentScope===targetScope){setAnimationStatus(message);setDraftSaveStatus(sourceSaved?'Draft saved · retry generation when ready':'Source save failed · your editor content remains open',sourceSaved?'saved':'error')}
     toast(message.length>150?'Could not create the animated explanation. Check the backend setup and try again.':message);
   }finally{
     animationRequestActive=false;
@@ -598,7 +743,9 @@ async function persistCurrentLesson(){
   }
   if(!editorDirty)return false;
   const id=currentId,scope=currentScope,userId=currentUser.uid,revision=editorRevision;
-  const lessonFields=lessonFormPayload(),slidesSnapshot=JSON.parse(JSON.stringify(deck)),payload={...lessonFields,id,slides:slidesSnapshot};
+  const lessonFields=lessonFormPayload();
+  if(lessonFields.source.length>SOURCE_LIMIT){setDraftSaveStatus('Source is over the 24,000 character limit','error');throw new Error('Reduce the source material below 24,000 characters before saving this draft.')}
+  const slidesSnapshot=JSON.parse(JSON.stringify(deck)),payload={...lessonFields,id,slides:slidesSnapshot};
   const item=lessons.find(x=>x.id===id&&x._scope===scope);
   if(item?.animationProvider==='gemini')payload.animationProvider='gemini';
   if(item?.animatedStoryboardVersion===1)payload.animatedStoryboardVersion=1;
@@ -612,11 +759,11 @@ async function persistCurrentLesson(){
   try{
     const result=await operation;
     if(item){item.slides=slidesSnapshot;item.status=result?.data?.status||item.status;Object.assign(item,lessonFields)}
-    if(currentId===id&&currentScope===scope&&currentUser?.uid===userId&&editorRevision===revision)editorDirty=false;
+    if(currentId===id&&currentScope===scope&&currentUser?.uid===userId&&editorRevision===revision){editorDirty=false;setDraftSaveStatus('All changes saved','saved')}
     renderLessons();updateWorkflowControls();
     return true;
   }catch(error){
-    if(currentId===id&&currentScope===scope&&currentUser?.uid===userId&&editorRevision===revision)editorDirty=true;
+    if(currentId===id&&currentScope===scope&&currentUser?.uid===userId&&editorRevision===revision){editorDirty=true;setDraftSaveStatus('Save failed · changes remain here','error')}
     throw error;
   }finally{
     if(activeSave===operation)activeSave=null;
@@ -629,15 +776,19 @@ async function flushCurrentSave(){
   return persistCurrentLesson();
 }
 function queueSave(){
-  if(!currentId||!currentUser||!canEditCurrentLesson()||animationRequestActive||workflowActionActive)return;
+  if(!currentId){if(roleCanAuthor())setDraftSaveStatus('New lesson · saved when created','info');return}
+  if(!currentUser||!canEditCurrentLesson()||animationRequestActive||workflowActionActive)return;
   editorDirty=true;editorRevision++;
   cancelScheduledSave();
+  const sourceLength=lessonFormPayload().source.length;
+  if(sourceLength>SOURCE_LIMIT){setDraftSaveStatus('Source is over the 24,000 character limit','error');return}
+  setDraftSaveStatus('Changes pending · autosave in a moment','saving');
   const scheduledId=setTimeout(async()=>{
     if(saveTimer!==scheduledId)return;
-    saveTimer=null;
+    saveTimer=null;setDraftSaveStatus('Saving changes…','saving');
     try{await persistCurrentLesson()}
-    catch(e){console.error('Lesson autosave failed:',e.code||'unknown');toast(e.message||'Could not save edits. The draft may have changed status.')}
-  },500);
+    catch(error){console.error('Lesson autosave failed:',error.code||'unknown');toast(error.message||'Could not save edits. The draft may have changed status.')}
+  },AUTOSAVE_DELAY_MS);
   saveTimer=scheduledId;
 }
 async function signIn(event){event.preventDefault();const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value,button=document.getElementById('loginButton'),error=document.getElementById('authError');error.textContent='';button.disabled=true;button.textContent='Signing in…';try{await auth.signInWithEmailAndPassword(email,password)}catch(e){error.textContent=e.code==='auth/invalid-credential'?'Email or password is incorrect.':e.message}finally{button.disabled=false;button.textContent='Sign in'}}

@@ -366,12 +366,28 @@ function testInternalSharedReviewQueueIsRoleGated() {
   for (const id of ['workflowState', 'submitReviewButton', 'reviewControls', 'approveLessonButton', 'requestChangesButton']) {
     assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should exist in the internal workflow UI`);
   }
-  for (const id of ['explanationNotes', 'formulaNotes', 'trickNotes', 'solveNotes']) {
-    assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should provide a separate source-note field`);
+  for (const id of ['topicBriefNotes', 'explanationNotes', 'formulaNotes', 'exampleNotes', 'trickNotes', 'solveNotes']) {
+    assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} should provide a dedicated authoring step`);
   }
+  assert.match(htmlSource, /HUMAN REVIEW GATE/, 'the independent approval route should remain visible in the authoring flow');
+  assert.match(htmlSource, /Independent reviewer/, 'approval must require a different reviewer');
   assert.match(appSource, /httpsCallable\('createInternalLesson'\)/, 'new content should go through the server-side shared-draft callable');
   assert.match(appSource, /httpsCallable\('transitionInternalLesson'\)/, 'review status changes should go through callable functions');
   assert.match(htmlSource, /No customer-facing publish route is enabled/, 'internal approval must not expose lessons to customers');
+
+  const wizard = createHarness({ speech: false });
+  vm.runInContext("currentRole='author';sharedQueueReady=true", wizard.context);
+  assert.equal(read(wizard, 'goToAuthoringStep(1)'), false, 'the wizard should require a topic title before advancing');
+  wizard.getElement('topic').value = 'Price elasticity';
+  assert.equal(read(wizard, 'goToAuthoringStep(1)'), false, 'the first step should require a topic brief');
+  wizard.getElement('topicBriefNotes').value = 'A concise introduction to how price changes affect demand.';
+  assert.equal(read(wizard, 'goToAuthoringStep(1)'), true);
+  assert.equal(read(wizard, 'authoringStep'), 1);
+  assert.equal(wizard.getElement('authorStep1').hidden, true);
+  assert.equal(wizard.getElement('authorStep2').hidden, false);
+  assert.equal(read(wizard, 'goToAuthoringStep(3)'), false, 'the stepper should not let authors skip ahead');
+  for (let step = 2; step < 6; step += 1) assert.equal(read(wizard, `goToAuthoringStep(${step})`), true);
+  assert.equal(wizard.getElement('createLessonButton').hidden, false, 'the save/build action should appear at the final step');
 
   const app = createHarness({ speech: false });
   vm.runInContext("currentUser={uid:'author-1'};currentRole='author';currentScope='internal';currentId='lesson-1';lessons=[{id:'lesson-1',_scope:'internal',createdByUid:'author-1',status:'draft'}]", app.context);
@@ -389,26 +405,39 @@ function testInternalSharedReviewQueueIsRoleGated() {
   assert.match(app.getElement('workflowHint').textContent, /allowedUsers\/\{uid\}/, 'a callable permission-denied response should explain the required role allow-list entry');
 }
 
-function testFourSourceFieldsComposeAndLoadLegacyNotes() {
+function testSixSourceFieldsComposeSlidesAndMigrateLegacyNotes() {
   const app = createHarness({ speech: false });
-  app.getElement('explanationNotes').value = 'Explain the central idea.';
-  app.getElement('formulaNotes').value = 'Use the main relationship.';
-  app.getElement('trickNotes').value = 'Remember the sign.';
-  app.getElement('solveNotes').value = 'Identify values, substitute, and check.';
+  app.getElement('topicBriefNotes').value = 'A brief describes how price changes affect quantity demanded.';
+  app.getElement('explanationNotes').value = 'Explain the central idea clearly.';
+  app.getElement('formulaNotes').value = 'Elasticity = percentage change in quantity divided by percentage change in price.';
+  app.getElement('exampleNotes').value = 'If quantity falls by 10 percent after price rises by 5 percent, elasticity is 2.';
+  app.getElement('trickNotes').value = 'Remember the sign and interpret magnitude.';
+  app.getElement('solveNotes').value = 'Identify values, substitute, and check the result.';
   let payload = read(app, 'lessonFormPayload()');
+  assert.match(payload.source, /TOPIC BRIEF:/);
   assert.match(payload.source, /EXPLANATION:/);
   assert.match(payload.source, /FORMULA:/);
+  assert.match(payload.source, /WORKED EXAMPLE:/);
   assert.match(payload.source, /TRICK:/);
   assert.match(payload.source, /STEPS:/);
+  const slides = read(app, `createSlides(${JSON.stringify({...payload, program:'B.Com'})})`);
+  assert.match(slides[0].body, /brief describes how price changes/, 'the topic brief should inform the opening slide');
+  assert.match(slides[1].body, /central idea/);
+  assert.match(slides[3].body, /Elasticity/);
+  assert.match(slides[4].body, /quantity falls/);
+  assert.match(slides[5].body, /Remember the sign/);
+  assert.match(slides[2].steps[0], /Identify values/);
 
-  const legacySource = 'EXPLANATION:\nDemand changes with price.\n\nFORMULA:\nElasticity = percentage change in quantity divided by percentage change in price.\n\nTRICK:\nCheck the sign first.\n\nSTEPS:\nIdentify the change.\nSubstitute the values.\n\nWORKED EXAMPLE:\nCompare the result with one.';
+  const legacySource = 'TOPIC BRIEF:\nElasticity describes a demand response.\n\nEXPLANATION:\nDemand changes with price.\n\nFORMULA / KEY TERMS:\nElasticity = percentage change in quantity divided by percentage change in price.\n\nTRICK / SHORTCUT:\nCheck the sign first.\n\nSTEPS:\nIdentify the change.\nSubstitute the values.\n\nWORKED EXAMPLE:\nCompare the result with one.';
   vm.runInContext(`populateSourceFields(${JSON.stringify(legacySource)})`, app.context);
+  assert.equal(app.getElement('topicBriefNotes').value, 'Elasticity describes a demand response.');
   assert.equal(app.getElement('explanationNotes').value, 'Demand changes with price.');
   assert.equal(app.getElement('formulaNotes').value, 'Elasticity = percentage change in quantity divided by percentage change in price.');
+  assert.equal(app.getElement('exampleNotes').value, 'Compare the result with one.');
   assert.equal(app.getElement('trickNotes').value, 'Check the sign first.');
-  assert.equal(app.getElement('solveNotes').value, 'Identify the change.\n\nSubstitute the values.\n\nCompare the result with one.');
+  assert.equal(app.getElement('solveNotes').value, 'Identify the change.\n\nSubstitute the values.');
   payload = read(app, 'lessonFormPayload()');
-  assert.match(payload.source, /Compare the result with one\./, 'legacy example content should be preserved in the solve field');
+  assert.match(payload.source, /WORKED EXAMPLE:\nCompare the result with one\./, 'legacy examples should migrate into the dedicated example step');
 }
 
 async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
@@ -432,20 +461,26 @@ async function testPrivateDraftAutosavePersistsFormAndSceneEdits() {
   vm.runInContext("db=mockDb;firebase=mockFirebase;currentUser={uid:'author-1'};currentRole=null;currentScope='private';currentId='legacy-1';lessons=[{id:'legacy-1',_scope:'private',status:'private',slides:[]}];deck=[{kind:'intro',title:'Old title',body:'Old body',steps:[]}];", app.context);
   app.getElement('program').value = 'B.Sc';
   app.getElement('topic').value = 'Edited topic';
+  app.getElement('topicBriefNotes').value = 'A short brief about this edited lesson topic.';
   app.getElement('explanationNotes').value = 'Updated explanation of the concept.';
   app.getElement('formulaNotes').value = 'Use the elasticity formula carefully.';
+  app.getElement('exampleNotes').value = 'A worked calculation with the final answer.';
   app.getElement('trickNotes').value = 'Remember the sign before calculating.';
   app.getElement('solveNotes').value = 'Step 1: identify the values.\nStep 2: substitute and check.';
   vm.runInContext("deck[0].body='Edited scene body';queueSave()", app.context);
-  app.advanceTime(500);
+  app.advanceTime(1099);
+  assert.equal(updates.length, 0, 'the idle autosave should wait until typing pauses');
+  app.advanceTime(1);
   await new Promise(resolve => setTimeout(resolve, 0));
 
   assert.equal(updates.length, 1, 'a debounced edit should save once');
   assert.equal(updates[0].id, 'legacy-1');
   assert.equal(updates[0].value.program, 'B.Sc');
   assert.equal(updates[0].value.topic, 'Edited topic');
+  assert.match(updates[0].value.source, /TOPIC BRIEF:\nA short brief about this edited lesson topic\./);
   assert.match(updates[0].value.source, /EXPLANATION:\nUpdated explanation of the concept\./);
   assert.match(updates[0].value.source, /FORMULA:\nUse the elasticity formula carefully\./);
+  assert.match(updates[0].value.source, /WORKED EXAMPLE:\nA worked calculation with the final answer\./);
   assert.match(updates[0].value.source, /TRICK:\nRemember the sign before calculating\./);
   assert.match(updates[0].value.source, /STEPS:\nStep 1: identify the values\.\nStep 2: substitute and check\./);
   assert.equal(updates[0].value.slides[0].body, 'Edited scene body');
@@ -521,7 +556,7 @@ async function main() {
   testFallbackTimingAndPacingControl();
   testAnimatedExplainerIsConsentGatedAndHasVideoExportControls();
   testInternalSharedReviewQueueIsRoleGated();
-  testFourSourceFieldsComposeAndLoadLegacyNotes();
+  testSixSourceFieldsComposeSlidesAndMigrateLegacyNotes();
   await testPrivateDraftAutosavePersistsFormAndSceneEdits();
   await testClosingAnUneditedReturnedDraftDoesNotResetItsWorkflowState();
   testAnimatedStoryboardUsesSevenScenesAndGeneratedNarration();

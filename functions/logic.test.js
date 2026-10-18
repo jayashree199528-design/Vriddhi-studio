@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const {
   SCENE_ORDER,
+  buildUserPrompt,
   canAuthor,
   canReview,
   getInternalRole,
@@ -163,6 +164,14 @@ test('rejects missing, duplicate, and unsupported scenes instead of changing the
 test('parses provider JSON while tolerating accidental markdown fences', () => {
   assert.deepEqual(parseJsonObject('```json\n{"scenes":[]}\n```'), { scenes: [] });
   assert.throws(() => parseJsonObject('not JSON'), /storyboard/);
+});
+
+test('routes the six authoring source sections to their matching storyboard scenes', () => {
+  const prompt = buildUserPrompt(validInput);
+  assert.match(prompt, /TOPIC BRIEF frames the opening/);
+  assert.match(prompt, /EXPLANATION informs the core concept/);
+  assert.match(prompt, /WORKED EXAMPLE informs the example scene/);
+  assert.match(prompt, /STEPS informs the process scene/);
 });
 
 test('calls Gemini with a server-side key and structured lesson prompt', async () => {

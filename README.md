@@ -68,10 +68,10 @@ The callables use Firebase's callable CORS handling by default. A Hosting-only d
 
 ## Existing lesson and playback behavior
 
-- Program, branch/specialization, subject, module, topic, and four categorized source-note fields.
+- Program, branch/specialization, subject, module, topic, and a six-step guided source workflow: topic brief, explanation, formulas/key terms, worked examples, tricks/shortcuts, and how-to-solve steps.
 - Fixed seven-scene teaching sequence; the AI storyboard enriches those scenes rather than changing their order.
-- Four separate source-note fields for explanation/concept, formulas/key terms, tricks/memory cues, and how-to-solve steps. Existing private drafts are sorted into these fields when opened and are saved back as labeled source text.
-- Optional source labels remain supported: `CONCEPT:`, `EXPLANATION:`, `STEPS:`, `FORMULA:`, `WORKED EXAMPLE:`, and `TRICK:`.
+- Existing private drafts are routed into the closest matching steps when opened and saved back as labeled source text. The authoring flow shows a 24,000-character source meter; existing drafts autosave after a short idle pause to avoid repeated writes while typing, and a new lesson is sent to Firebase when the author creates it from the final step.
+- Optional source labels remain supported: `TOPIC BRIEF:`, `CONCEPT:`, `EXPLANATION:`, `STEPS:`, `FORMULA / KEY TERMS:`, `WORKED EXAMPLE:`, and `TRICK / SHORTCUT:`.
 - Continuous browser speech; each scene advances after narration ends, plus a configurable 0/2/4/6-second pause (2 seconds by default). If speech is unavailable, timing is estimated from narration length.
 - Pause, resume, stop, manual next/previous, single-scene narration, and speech cleanup when closing or signing out.
 - Auto/Female/Male browser voice preference where a matching English voice is available.
